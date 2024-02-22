@@ -6,7 +6,7 @@ var _width := 0
 var _height := 0
 
 # Конструктор для инициализации двумерного массива
-func _init(width, height):
+func _init(width: int, height: int) -> void:
 	_width = width
 	_height = height
 	_array.resize(width * height)
