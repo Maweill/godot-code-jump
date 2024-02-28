@@ -62,14 +62,17 @@ func highlight_matches() -> void:
 	for line_index in range(first_visible_line_index, last_visible_line_index + 1):
 		visible_lines_text += text_editor.get_line(line_index)
 	var whole_words: Array[String] = get_words_starting_with_letter(visible_lines_text, jump_letter)
-	print("whole_words=%s" % whole_words.is_empty())
-	var first_matched_word := whole_words[0]
-	#TODO двигать каретку и линию после каждого нахождения и начинать поиск заново
-	#TODO пока результат не будет пустым
+	print("are words empty=%s" % whole_words.is_empty())
+
+	# двигать каретку и линию после каждого нахождения и начинать поиск c нового места
+	var line_search_start_index: int = first_visible_line_index
+	var column_search_start_index: int = 0
 	var search_result: Vector2i
 	for word in whole_words:
-		search_result = text_editor.search(word, 2, first_visible_line_index, 0)
+		search_result = text_editor.search(word, 2, line_search_start_index, column_search_start_index)
 		print("word=%s, search_result=%s" % [word, search_result])
+		line_search_start_index = search_result.y
+		column_search_start_index = search_result.x + 1
 
 	var caret_index := text_editor.add_caret(search_result.y, search_result.x)
 	await get_tree().create_timer(0.13).timeout
