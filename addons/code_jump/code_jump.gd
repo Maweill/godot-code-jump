@@ -8,7 +8,7 @@ const ACTIVATE_PLUGIN_SHORTCUT_SETTING_NAME: StringName = CODE_JUMP_SETTING_NAME
 var activate_plugin_shortcut: Shortcut
 #endregion
 
-var jump_hint_scene = preload("res://addons/code_jump/jump_hint.tscn")
+var jump_hint_scene: PackedScene = preload("res://addons/code_jump/jump_hint.tscn")
 var text_editor: TextEdit
 
 var listening_for_jump_letter: bool
@@ -35,7 +35,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if !event.is_pressed():
 		return
 
-	var editor = EditorInterface.get_script_editor()
+	var editor := EditorInterface.get_script_editor()
 	text_editor = editor.get_current_editor().get_base_editor()
 
 	if listening_for_jump_letter:
@@ -55,27 +55,26 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		return
 
 func highlight_matches() -> void:
-	var first_visible_line_index = text_editor.get_first_visible_line()
-	var last_visible_line_index = text_editor.get_last_full_visible_line()
-	var visible_lines_text = ""
+	var first_visible_line_index := text_editor.get_first_visible_line()
+	var last_visible_line_index := text_editor.get_last_full_visible_line()
+	var visible_lines_text := ""
 
 	for line_index in range(first_visible_line_index, last_visible_line_index + 1):
 		visible_lines_text += text_editor.get_line(line_index)
-	var whole_words = get_words_starting_with_letter(visible_lines_text, jump_letter)
+	var whole_words: Array[String] = get_words_starting_with_letter(visible_lines_text, jump_letter)
 	print("whole_words=%s" % whole_words.is_empty())
-	var first_matched_word = whole_words[0]
+	var first_matched_word := whole_words[0]
 	#TODO двигать каретку и линию после каждого нахождения и начинать поиск заново
 	#TODO пока результат не будет пустым
-	#for word in whole_words:
+	var search_result: Vector2i
+	for word in whole_words:
+		search_result = text_editor.search(word, 2, first_visible_line_index, 0)
+		print("word=%s, search_result=%s" % [word, search_result])
 
-
-	var search_result = text_editor.search(first_matched_word, 2, first_visible_line_index, 0)
-	print("search_result=%s" % search_result)
-
-	var caret_index = text_editor.add_caret(search_result.y, search_result.x)
+	var caret_index := text_editor.add_caret(search_result.y, search_result.x)
 	await get_tree().create_timer(0.13).timeout
-	var caret_position = text_editor.get_caret_draw_pos(caret_index)
-	var jump_hint = jump_hint_scene.instantiate() as Label
+	var caret_position: Vector2 = text_editor.get_caret_draw_pos(caret_index)
+	var jump_hint: Label = jump_hint_scene.instantiate()
 	jump_hint.set_position(caret_position)
 	text_editor.add_child(jump_hint)
 	text_editor.remove_caret(caret_index)
@@ -85,7 +84,7 @@ func highlight_matches() -> void:
 
 func get_words_starting_with_letter(text: String, letter: String) -> Array[String]:
 	# Regular expression to split the text by non-word characters
-	var regex = RegEx.new()
+	var regex := RegEx.new()
 	regex.compile("\\w+")
 
 	# Split the string into words using the regex
@@ -94,7 +93,7 @@ func get_words_starting_with_letter(text: String, letter: String) -> Array[Strin
 	# Filter words that start with 'm'
 	var filtered_words: Array[String] = []
 	for word in words:
-		var word_string = word.get_string()
+		var word_string := word.get_string()
 		if word_string.begins_with(letter.to_lower()) or word_string.begins_with(letter.capitalize()): # Case-insensitive check
 			filtered_words.append(word_string)
 
@@ -115,4 +114,4 @@ func get_or_create_activate_plugin_shortcut(editor_settings: EditorSettings) -> 
 	return editor_settings.get_setting(ACTIVATE_PLUGIN_SHORTCUT_SETTING_NAME)
 
 func get_editor_settings() -> EditorSettings:
-	return get_editor_interface().get_editor_settings()
+	return EditorInterface.get_editor_settings()
