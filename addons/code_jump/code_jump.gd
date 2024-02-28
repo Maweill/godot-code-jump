@@ -8,6 +8,7 @@ const ACTIVATE_PLUGIN_SHORTCUT_SETTING_NAME: StringName = CODE_JUMP_SETTING_NAME
 var activate_plugin_shortcut: Shortcut
 #endregion
 
+var jump_hint_scene = preload("res://addons/code_jump/jump_hint.tscn")
 var text_editor: TextEdit
 
 var listening_for_jump_letter: bool
@@ -27,6 +28,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		return
 
 	if listeting_for_navigation_letter and event.is_released():
+		listeting_for_navigation_letter = false
 		text_editor.grab_focus()
 		return
 
@@ -57,19 +59,29 @@ func highlight_matches() -> void:
 	var last_visible_line_index = text_editor.get_last_full_visible_line()
 	var visible_lines_text = ""
 
-	# спавним по курсору на каждое слово
-	# меняем первую букву на "a", "b", "c"...
-	# ждем ввода пользователя
-	# перемещаем курсор к выбранному слову
-	# возвращаем первые буквы в исходное
 	for line_index in range(first_visible_line_index, last_visible_line_index + 1):
 		visible_lines_text += text_editor.get_line(line_index)
 	var whole_words = get_words_starting_with_letter(visible_lines_text, jump_letter)
 	print("whole_words=%s" % whole_words.is_empty())
-	var search_result = text_editor.search(whole_words[0], 2, first_visible_line_index, 0)
+	var first_matched_word = whole_words[0]
+	#TODO двигать каретку и линию после каждого нахождения и начинать поиск заново
+	#TODO пока результат не будет пустым
+	#for word in whole_words:
+
+
+	var search_result = text_editor.search(first_matched_word, 2, first_visible_line_index, 0)
 	print("search_result=%s" % search_result)
-	text_editor.set_caret_line(search_result.y, false)
-	text_editor.set_caret_column(search_result.x, false)
+
+	var caret_index = text_editor.add_caret(search_result.y, search_result.x)
+	await get_tree().create_timer(0.13).timeout
+	var caret_position = text_editor.get_caret_draw_pos(caret_index)
+	var jump_hint = jump_hint_scene.instantiate() as Label
+	jump_hint.set_position(caret_position)
+	text_editor.add_child(jump_hint)
+	text_editor.remove_caret(caret_index)
+
+	#text_editor.set_caret_line(search_result.y, false)
+	#text_editor.set_caret_column(search_result.x, false)
 
 func get_words_starting_with_letter(text: String, letter: String) -> Array[String]:
 	# Regular expression to split the text by non-word characters
