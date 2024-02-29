@@ -9,6 +9,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="ColorRect" type="ColorRect" parent="."]
+visible = false
 show_behind_parent = true
 layout_mode = 1
 anchors_preset = 15
@@ -16,4 +17,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+scale = Vector2(0.76, 0.76)
+pivot_offset = Vector2(5, 11)
 color = Color(1, 0, 0, 1)

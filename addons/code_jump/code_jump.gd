@@ -8,7 +8,7 @@ const ACTIVATE_PLUGIN_SHORTCUT_SETTING_NAME: StringName = CODE_JUMP_SETTING_NAME
 var activate_plugin_shortcut: Shortcut
 #endregion
 
-var jump_hint_scene: PackedScene = preload("res://addons/code_jump/jump_hint.tscn")
+var jump_hint_scene: PackedScene = preload("jump_hint.tscn")
 var text_editor: TextEdit
 
 var listening_for_jump_letter: bool
@@ -74,13 +74,21 @@ func highlight_matches() -> void:
 		line_search_start_index = search_result.y
 		column_search_start_index = search_result.x + 1
 
-	var caret_index := text_editor.add_caret(search_result.y, search_result.x)
-	await get_tree().create_timer(0.13).timeout
-	var caret_position: Vector2 = text_editor.get_caret_draw_pos(caret_index)
-	var jump_hint: Label = jump_hint_scene.instantiate()
-	jump_hint.set_position(caret_position)
-	text_editor.add_child(jump_hint)
-	text_editor.remove_caret(caret_index)
+		var caret_index := text_editor.add_caret(search_result.y, search_result.x)
+		await get_tree().create_timer(0.13).timeout
+		#TODO Буква встает ровно на одну линию ниже чем нужно
+		var caret_position: Vector2 = text_editor.get_caret_draw_pos(caret_index)
+		var jump_hint: Label = jump_hint_scene.instantiate()
+		var font_size = get_editor_settings().get_setting("interface/editor/code_font_size")
+
+		jump_hint.set("theme_override_font_sizes/font_size", font_size)
+		print("font_size=%s" % get_editor_settings().get_setting("interface/editor/display_scale"))
+		jump_hint.scale *= EditorInterface.get_editor_scale()
+		caret_position.y -= text_editor.get_line_height()
+		caret_position.x -= jump_hint.size.x / 2
+		jump_hint.set_global_position(caret_position)
+		text_editor.add_child(jump_hint)
+		text_editor.remove_caret(caret_index)
 
 	#text_editor.set_caret_line(search_result.y, false)
 	#text_editor.set_caret_column(search_result.x, false)
