@@ -5,6 +5,9 @@ class JumpHint:
 	var text_editor_position: Vector2i
 	var view: Label
 
+	func set_position(position: Vector2):
+		view.set_global_position(position)
+
 	func hide():
 		view.hide()
 
@@ -92,6 +95,19 @@ func highlight_matches_async() -> void:
 
 		await create_and_display_jump_hint(word, search_result, last_jump_letter_code)
 		last_jump_letter_code += 1
+#
+	#for word in whole_words:
+		#var search_result := search_for_word(word, search_start)
+		#update_search_start(search_start, search_result)
+#
+		#var jump_hint_view := create_jump_hint_view(search_result, last_jump_letter_code)
+		#position_jump_hint(jump_hint_view, search_result)
+		#text_editor.add_child(jump_hint_view)
+#
+		#last_jump_letter_code += 1
+#
+		#text_editor.remove_caret(search_result.y, search_result.x)
+		#await get_tree().create_timer(TIMER_DELAY).timeout
 
 func get_visible_lines_text(text_editor: TextEdit) -> String:
 	var first_visible_line_index := text_editor.get_first_visible_line()
@@ -105,7 +121,6 @@ func create_and_display_jump_hint(word: String, search_result: Vector2i, last_ju
 	var caret_index := text_editor.add_caret(search_result.y, search_result.x)
 	await get_tree().create_timer(0.13).timeout
 
-	var caret_position := text_editor.get_caret_draw_pos(caret_index)
 	var jump_hint_view := jump_hint_scene.instantiate()
 	var jump_hint := JumpHint.new()
 	jump_hint.view = jump_hint_view
@@ -119,13 +134,18 @@ func create_and_display_jump_hint(word: String, search_result: Vector2i, last_ju
 	jump_hint_view.set("theme_override_font_sizes/font_size", font_size)
 	print("font_size=%s" % get_editor_settings().get_setting("interface/editor/display_scale"))
 	jump_hint_view.scale *= EditorInterface.get_editor_scale()
-	caret_position.y -= text_editor.get_line_height()
-	caret_position.x -= jump_hint_view.size.x / 2
 
-	jump_hint_view.set_global_position(caret_position)
+	position_jump_hint(text_editor, jump_hint.view, caret_index)
+
 	text_editor.add_child(jump_hint_view)
 	print("hint_text=%s" % jump_hint_view.text)
 	text_editor.remove_caret(caret_index)
+
+func position_jump_hint(text_editor: TextEdit, jump_hint_view: Label, caret_index: int) -> void:
+	var caret_position := text_editor.get_caret_draw_pos(caret_index)
+	caret_position.y -= text_editor.get_line_height()
+	caret_position.x -= jump_hint_view.size.x / 2
+	jump_hint_view.set_position(caret_position)
 
 func hide_jump_hints(hints: Dictionary) -> void:
 	for hint: JumpHint in hints.values():
