@@ -4,8 +4,8 @@
 offset_right = 10.0
 offset_bottom = 23.0
 size_flags_horizontal = 4
+theme_override_colors/font_color = Color(1, 0.0117647, 0.00784314, 1)
 text = "a"
-horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="ColorRect" type="ColorRect" parent="."]
@@ -17,6 +17,5 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-scale = Vector2(0.76, 0.76)
-pivot_offset = Vector2(5, 11)
+scale = Vector2(0.6, 0.6)
 color = Color(1, 0, 0, 1)
