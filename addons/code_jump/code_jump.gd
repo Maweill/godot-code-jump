@@ -77,53 +77,55 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		return
 
 func highlight_matches_async() -> void:
-	var first_visible_line_index := text_editor.get_first_visible_line()
-	var last_visible_line_index := text_editor.get_last_full_visible_line()
-	var visible_lines_text := ""
+	var visible_lines_text := get_visible_lines_text(text_editor)
+	var whole_words := get_words_starting_with_letter(visible_lines_text, jump_letter)
 
-	for line_index in range(first_visible_line_index, last_visible_line_index + 1):
-		visible_lines_text += text_editor.get_line(line_index)
-	var whole_words: Array[String] = get_words_starting_with_letter(visible_lines_text, jump_letter)
-	print("are words empty=%s" % whole_words.is_empty())
+	var line_search_start_index := text_editor.get_first_visible_line()
+	var column_search_start_index := 0
+	var last_jump_letter_code := 97 # ASCII code for 'a'
 
-	# Двигать каретку и линию после каждого нахождения и начинать поиск c нового места
-	var line_search_start_index: int = first_visible_line_index
-	var column_search_start_index: int = 0
-	var search_result: Vector2i
-
-	var last_jump_letter_code: int = 97
 	for word in whole_words:
-		search_result = text_editor.search(word, 2, line_search_start_index, column_search_start_index)
+		var search_result := text_editor.search(word, 2, line_search_start_index, column_search_start_index)
 		print("word=%s, search_result=%s" % [word, search_result])
 		line_search_start_index = search_result.y
 		column_search_start_index = search_result.x + 1
 
-		var caret_index := text_editor.add_caret(search_result.y, search_result.x)
-		await get_tree().create_timer(0.13).timeout
-
-		var caret_position: Vector2 = text_editor.get_caret_draw_pos(caret_index)
-		var jump_hint_view: Label = jump_hint_scene.instantiate()
-		var jump_hint: JumpHint = JumpHint.new()
-		jump_hint.view = jump_hint_view
-		jump_hint.text_editor_position = search_result
-		var last_jump_letter = char(last_jump_letter_code)
-		print("last_jump_letter=%s" % last_jump_letter)
-		jump_hints[last_jump_letter] = jump_hint
+		await create_and_display_jump_hint(word, search_result, last_jump_letter_code)
 		last_jump_letter_code += 1
-		jump_hint_view.text = last_jump_letter
-		var font_size = get_editor_settings().get_setting("interface/editor/code_font_size")
 
-		jump_hint_view.set("theme_override_font_sizes/font_size", font_size)
-		print("font_size=%s" % get_editor_settings().get_setting("interface/editor/display_scale"))
-		jump_hint_view.scale *= EditorInterface.get_editor_scale()
-		# Буква встает ровно на одну линию ниже чем нужно
-		caret_position.y -= text_editor.get_line_height()
-		caret_position.x -= jump_hint_view.size.x / 2
+func get_visible_lines_text(text_editor: TextEdit) -> String:
+	var first_visible_line_index := text_editor.get_first_visible_line()
+	var last_visible_line_index := text_editor.get_last_full_visible_line()
+	var lines := []
+	for line_index in range(first_visible_line_index, last_visible_line_index + 1):
+		lines.append(text_editor.get_line(line_index))
+	return "\n".join(lines)
 
-		jump_hint_view.set_global_position(caret_position)
-		text_editor.add_child(jump_hint_view)
-		print("hint_text=%s" % jump_hint_view.text)
-		text_editor.remove_caret(caret_index)
+func create_and_display_jump_hint(word: String, search_result: Vector2i, last_jump_letter_code: int) -> void:
+	var caret_index := text_editor.add_caret(search_result.y, search_result.x)
+	await get_tree().create_timer(0.13).timeout
+
+	var caret_position := text_editor.get_caret_draw_pos(caret_index)
+	var jump_hint_view := jump_hint_scene.instantiate()
+	var jump_hint := JumpHint.new()
+	jump_hint.view = jump_hint_view
+	jump_hint.text_editor_position = search_result
+	var last_jump_letter = char(last_jump_letter_code)
+	print("last_jump_letter=%s" % last_jump_letter)
+	jump_hints[last_jump_letter] = jump_hint
+	jump_hint_view.text = last_jump_letter
+	var font_size = get_editor_settings().get_setting("interface/editor/code_font_size")
+
+	jump_hint_view.set("theme_override_font_sizes/font_size", font_size)
+	print("font_size=%s" % get_editor_settings().get_setting("interface/editor/display_scale"))
+	jump_hint_view.scale *= EditorInterface.get_editor_scale()
+	caret_position.y -= text_editor.get_line_height()
+	caret_position.x -= jump_hint_view.size.x / 2
+
+	jump_hint_view.set_global_position(caret_position)
+	text_editor.add_child(jump_hint_view)
+	print("hint_text=%s" % jump_hint_view.text)
+	text_editor.remove_caret(caret_index)
 
 func hide_jump_hints(hints: Dictionary) -> void:
 	for hint: JumpHint in hints.values():
