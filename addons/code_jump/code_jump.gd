@@ -85,29 +85,18 @@ func highlight_matches_async() -> void:
 
 	var line_search_start_index := text_editor.get_first_visible_line()
 	var column_search_start_index := 0
-	var last_jump_letter_code := 97 # ASCII code for 'a'
-
+	var hint_letter_code := 97 # ASCII code for 'a'
 	for word in whole_words:
-		var search_result := text_editor.search(word, 2, line_search_start_index, column_search_start_index)
-		print("word=%s, search_result=%s" % [word, search_result])
-		line_search_start_index = search_result.y
-		column_search_start_index = search_result.x + 1
+		var word_position := text_editor.search(word, 2, line_search_start_index, column_search_start_index)
+		print("word=%s, word_position=%s" % [word, word_position])
+		line_search_start_index = word_position.y
+		column_search_start_index = word_position.x + 1
 
-		await create_and_display_jump_hint(word, search_result, last_jump_letter_code)
-		last_jump_letter_code += 1
-#
-	#for word in whole_words:
-		#var search_result := search_for_word(word, search_start)
-		#update_search_start(search_start, search_result)
-#
-		#var jump_hint_view := create_jump_hint_view(search_result, last_jump_letter_code)
-		#position_jump_hint(jump_hint_view, search_result)
-		#text_editor.add_child(jump_hint_view)
-#
-		#last_jump_letter_code += 1
-#
-		#text_editor.remove_caret(search_result.y, search_result.x)
-		#await get_tree().create_timer(TIMER_DELAY).timeout
+		var hint_letter = char(hint_letter_code)
+		hint_letter_code += 1
+		print("hint_letter=%s" % hint_letter)
+
+		await create_and_display_jump_hint(word, word_position, hint_letter)
 
 func get_visible_lines_text(text_editor: TextEdit) -> String:
 	var first_visible_line_index := text_editor.get_first_visible_line()
@@ -117,29 +106,33 @@ func get_visible_lines_text(text_editor: TextEdit) -> String:
 		lines.append(text_editor.get_line(line_index))
 	return "\n".join(lines)
 
-func create_and_display_jump_hint(word: String, search_result: Vector2i, last_jump_letter_code: int) -> void:
+func create_and_display_jump_hint(word: String, search_result: Vector2i, hint_letter: String) -> void:
 	var caret_index := text_editor.add_caret(search_result.y, search_result.x)
 	await get_tree().create_timer(0.13).timeout
 
-	var jump_hint_view := jump_hint_scene.instantiate()
-	var jump_hint := JumpHint.new()
-	jump_hint.view = jump_hint_view
-	jump_hint.text_editor_position = search_result
-	var last_jump_letter = char(last_jump_letter_code)
-	print("last_jump_letter=%s" % last_jump_letter)
-	jump_hints[last_jump_letter] = jump_hint
-	jump_hint_view.text = last_jump_letter
-	var font_size = get_editor_settings().get_setting("interface/editor/code_font_size")
-
-	jump_hint_view.set("theme_override_font_sizes/font_size", font_size)
-	print("font_size=%s" % get_editor_settings().get_setting("interface/editor/display_scale"))
-	jump_hint_view.scale *= EditorInterface.get_editor_scale()
+	var jump_hint = create_jump_hint(search_result, hint_letter)
+	jump_hints[hint_letter] = jump_hint
 
 	position_jump_hint(text_editor, jump_hint.view, caret_index)
+	text_editor.add_child(jump_hint.view)
 
-	text_editor.add_child(jump_hint_view)
-	print("hint_text=%s" % jump_hint_view.text)
 	text_editor.remove_caret(caret_index)
+
+func create_jump_hint(text_editor_position: Vector2i, hint_letter: String) -> JumpHint:
+	var jump_hint := JumpHint.new()
+	jump_hint.view = create_jump_hint_view(hint_letter)
+	jump_hint.text_editor_position = text_editor_position
+	return jump_hint
+
+func create_jump_hint_view(hint_letter: String) -> Label:
+	var jump_hint_view = jump_hint_scene.instantiate()
+	jump_hint_view.text = hint_letter
+
+	var font_size = get_editor_settings().get_setting("interface/editor/code_font_size")
+	jump_hint_view.set("theme_override_font_sizes/font_size", font_size)
+
+	jump_hint_view.scale *= EditorInterface.get_editor_scale()
+	return jump_hint_view
 
 func position_jump_hint(text_editor: TextEdit, jump_hint_view: Label, caret_index: int) -> void:
 	var caret_position := text_editor.get_caret_draw_pos(caret_index)
