@@ -83,20 +83,18 @@ func highlight_matches_async() -> void:
 	var visible_lines_text := get_visible_lines_text(text_editor)
 	var whole_words := get_words_starting_with_letter(visible_lines_text, jump_letter)
 
-	var line_search_start_index := text_editor.get_first_visible_line()
-	var column_search_start_index := 0
+	var search_start := Vector2i(0, text_editor.get_first_visible_line())
 	var hint_letter_code := 97 # ASCII code for 'a'
 	for word in whole_words:
-		var word_position := text_editor.search(word, 2, line_search_start_index, column_search_start_index)
-		print("word=%s, word_position=%s" % [word, word_position])
-		line_search_start_index = word_position.y
-		column_search_start_index = word_position.x + 1
-
+		var word_position := text_editor.search(word, 2, search_start.y, search_start.x)
 		var hint_letter = char(hint_letter_code)
-		hint_letter_code += 1
+		await create_and_display_jump_hint(word, word_position, hint_letter)
+
+		print("word=%s, word_position=%s" % [word, word_position])
 		print("hint_letter=%s" % hint_letter)
 
-		await create_and_display_jump_hint(word, word_position, hint_letter)
+		search_start = Vector2i(word_position.x + 1, word_position.y)
+		hint_letter_code += 1
 
 func get_visible_lines_text(text_editor: TextEdit) -> String:
 	var first_visible_line_index := text_editor.get_first_visible_line()
