@@ -23,7 +23,7 @@ var text_editor: TextEdit
 
 #TODO Локальные переменные с нижнего подчеркивания
 var listening_for_jump_letter: bool
-var listeting_for_navigation_letter: bool
+var listening_for_navigation_letter: bool
 var jump_letter: String
 var jump_hints: Dictionary = {}
 
@@ -36,13 +36,17 @@ func _exit_tree() -> void:
 	pass
 
 func _unhandled_key_input(event: InputEvent) -> void:
-	if !(event is InputEventKey):
+	if not (event is InputEventKey and event.is_pressed()):
 		return
 
-	if listeting_for_navigation_letter and event.is_pressed():
+	var script_editor := EditorInterface.get_script_editor()
+	text_editor = script_editor.get_current_editor().get_base_editor()
+
+	# 3
+	if listening_for_navigation_letter:
 		get_viewport().set_input_as_handled()
 		text_editor.grab_focus()
-		listeting_for_navigation_letter = false
+		listening_for_navigation_letter = false
 
 		var navigation_letter = (event as InputEventKey).as_text_key_label().to_lower()
 		print("navigation_letter=%s" % navigation_letter)
@@ -53,16 +57,11 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		text_editor.set_caret_column(jump_hint_position.x, false)
 		return
 
-	if !event.is_pressed():
-		return
-
-	var editor := EditorInterface.get_script_editor()
-	text_editor = editor.get_current_editor().get_base_editor()
-
+	# 2
 	if listening_for_jump_letter:
 		get_viewport().set_input_as_handled()
 		listening_for_jump_letter = false
-		listeting_for_navigation_letter = true
+		listening_for_navigation_letter = true
 
 		jump_letter = (event as InputEventKey).as_text_key_label()
 		print("jump_letter=%s" % jump_letter)
@@ -71,12 +70,13 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		text_editor.release_focus()
 		return
 
+	# 1
 	if activate_plugin_shortcut.matches_event(event):
 		get_viewport().set_input_as_handled()
 		listening_for_jump_letter = true
-		listeting_for_navigation_letter = false
-		print("listening for jump key")
+		listening_for_navigation_letter = false
 		text_editor.release_focus()
+		print("listening for jump key")
 		return
 
 func highlight_matches_async() -> void:
