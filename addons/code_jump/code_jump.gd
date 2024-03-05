@@ -27,7 +27,14 @@ var listening_for_navigation_letter: bool
 var jump_letter: String
 var jump_hints: Dictionary = {}
 
+var _model: CJModel
+var current_state: CJState
+var states: Dictionary
+
 func _enter_tree() -> void:
+	_model = CJModel.new()
+	init_states()
+
 	var editor_settings: EditorSettings = get_editor_settings()
 	activate_plugin_shortcut = get_or_create_activate_plugin_shortcut(editor_settings)
 
@@ -78,6 +85,18 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		text_editor.release_focus()
 		print("listening for jump key")
 		return
+
+func init_states() -> void:
+	var idle_state := CJIdleState.new()
+	var listen_jump_letter_state := CJListenJumpLetterState.new()
+	var listen_hint_letter_state := CJListenHintLetterState.new()
+	pass
+
+func change_state(state: CJState) -> void:
+	if current_state:
+		current_state.on_exit()
+	current_state = state
+	current_state.on_enter(_model)
 
 func highlight_matches_async() -> void:
 	var visible_lines_text := get_visible_lines_text(text_editor)

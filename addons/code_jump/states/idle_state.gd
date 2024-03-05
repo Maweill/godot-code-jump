@@ -5,13 +5,10 @@ var _viewport: Viewport
 var _text_editor: TextEdit
 var _plugin_shortcut: Shortcut
 
-func _init(viewport: Viewport, text_editor: TextEdit, plugin_shorcut: Shortcut) -> void:
-	_viewport = viewport
-	_text_editor = text_editor
-	_plugin_shortcut = plugin_shorcut
-
-func on_enter() -> void:
-	pass
+func on_enter(model: CJModel) -> void:
+	_viewport = model.viewport
+	_text_editor = model.text_editor
+	_plugin_shortcut = model.plugin_shorcut
 
 func on_exit() -> void:
 	pass
@@ -24,3 +21,6 @@ func on_input(event: InputEvent) -> void:
 
 	_viewport.set_input_as_handled()
 	# transition to listen_jump_letter_state
+
+func get_type() -> int:
+	return CJStateType.IDLE

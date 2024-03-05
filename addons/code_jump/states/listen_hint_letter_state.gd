@@ -19,18 +19,17 @@ var _text_editor: TextEdit
 var _jump_letter: String
 var _jump_hints: Dictionary = {}
 
-func _init(viewport: Viewport, text_editor: TextEdit, jump_letter: String) -> void:
-	_viewport = viewport
-	_text_editor = text_editor
-	_jump_letter = jump_letter
+func on_enter(model: CJModel) -> void:
+	_viewport = model.viewport
+	_text_editor = model.text_editor
+	_jump_letter = model.jump_letter
 
-func on_enter() -> void:
 	_text_editor.grab_focus()
 	await _highlight_matches_async()
 	_text_editor.release_focus()
 
 func on_exit() -> void:
-	pass
+	_hide_jump_hints(_jump_hints)
 
 func on_input(event: InputEvent) -> void:
 	if not (event is InputEventKey and event.is_pressed()):
@@ -86,6 +85,10 @@ func _create_jump_hint_view(hint_letter: String) -> Label:
 	jump_hint_view.scale *= EditorInterface.get_editor_scale()
 	return jump_hint_view
 
+func _hide_jump_hints(hints: Dictionary) -> void:
+	for hint: JumpHint in hints.values():
+		hint.hide()
+
 func _create_and_start_timer(time_sec: float) -> Timer:
 	var timer = Timer.new()
 	timer.one_shot = true
@@ -125,3 +128,6 @@ func _get_words_starting_with_letter(text: String, letter: String) -> Array[Stri
 
 func _get_editor_settings() -> EditorSettings:
 	return EditorInterface.get_editor_settings()
+
+func get_type() -> int:
+	return CJStateType.LISTEN_HINT_LETTER
