@@ -14,13 +14,11 @@ class JumpHint:
 signal jump_position_received(position: Vector2i)
 
 var _jump_hint_scene: PackedScene = preload("res://addons/code_jump/jump_hint.tscn")
-var _viewport: Viewport
 var _text_editor: TextEdit
 var _jump_letter: String
 var _jump_hints: Dictionary = {}
 
 func on_enter(model: CJModel) -> void:
-	_viewport = model.viewport
 	_text_editor = model.text_editor
 	_jump_letter = model.jump_letter
 
@@ -31,11 +29,11 @@ func on_enter(model: CJModel) -> void:
 func on_exit() -> void:
 	_hide_jump_hints(_jump_hints)
 
-func on_input(event: InputEvent) -> void:
+func on_input(event: InputEvent, viewport: Viewport) -> void:
 	if not (event is InputEventKey and event.is_pressed()):
 		return
 
-	_viewport.set_input_as_handled()
+	viewport.set_input_as_handled()
 	var hint_letter = (event as InputEventKey).as_text_key_label().to_lower()
 	var jump_hint_position: Vector2i = (_jump_hints.get(hint_letter) as JumpHint).text_editor_position
 	jump_position_received.emit(jump_hint_position)
@@ -59,7 +57,9 @@ func _highlight_matches_async() -> void:
 
 func _create_and_display_jump_hint(word: String, search_result: Vector2i, hint_letter: String) -> void:
 	var caret_index := _text_editor.add_caret(search_result.y, search_result.x)
+	print("TEST")
 	await _create_and_start_timer(0.13).timeout
+	print("TEST AFTER")
 
 	var jump_hint = _create_jump_hint(search_result, hint_letter)
 	_jump_hints[hint_letter] = jump_hint
@@ -92,6 +92,7 @@ func _hide_jump_hints(hints: Dictionary) -> void:
 func _create_and_start_timer(time_sec: float) -> Timer:
 	var timer = Timer.new()
 	timer.one_shot = true
+	_text_editor.add_child(timer)
 	timer.start(time_sec)
 	return timer
 

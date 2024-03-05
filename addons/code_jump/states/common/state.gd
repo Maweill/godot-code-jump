@@ -6,7 +6,7 @@ func on_enter(model: CJModel) -> void:
 func on_exit() -> void:
 	pass
 
-func on_input(event: InputEvent) -> void:
+func on_input(event: InputEvent, viewport: Viewport) -> void:
 	pass
 
 func get_type() -> int:
