@@ -49,11 +49,13 @@ func init_states() -> void:
 	change_state(idle_state)
 
 func update_model(model: CJModel) -> void:
-	var script_editor := EditorInterface.get_script_editor()
-	var text_editor := script_editor.get_current_editor().get_base_editor()
-	model.text_editor = text_editor
 	var editor_settings: EditorSettings = EditorInterface.get_editor_settings()
 	model.plugin_shortcut = get_or_create_activate_plugin_shortcut(editor_settings)
+
+	var text_editor := get_current_text_editor()
+	if text_editor == null:
+		return
+	model.text_editor = text_editor
 
 func change_state(state: CJState) -> void:
 	if current_state:
@@ -75,3 +77,11 @@ func get_or_create_activate_plugin_shortcut(editor_settings: EditorSettings) -> 
 		editor_settings.set_initial_value(ACTIVATE_PLUGIN_SHORTCUT_SETTING_NAME, shortcut, false)
 
 	return editor_settings.get_setting(ACTIVATE_PLUGIN_SHORTCUT_SETTING_NAME)
+
+func get_current_text_editor() -> TextEdit:
+	var script_editor := EditorInterface.get_script_editor()
+	var current_editor := script_editor.get_current_editor()
+	if current_editor == null:
+		return null
+	var text_editor := current_editor.get_base_editor()
+	return text_editor
