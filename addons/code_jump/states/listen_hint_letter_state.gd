@@ -35,7 +35,10 @@ func on_input(event: InputEvent, viewport: Viewport) -> void:
 
 	viewport.set_input_as_handled()
 	var hint_letter = (event as InputEventKey).as_text_key_label().to_lower()
-	var jump_hint_position: Vector2i = (_jump_hints.get(hint_letter) as JumpHint).text_editor_position
+	var jump_hint := _jump_hints.get(hint_letter) as JumpHint
+	if jump_hint == null:
+		return
+	var jump_hint_position: Vector2i = jump_hint.text_editor_position
 	jump_position_received.emit(jump_hint_position)
 
 func _highlight_matches_async() -> void:
