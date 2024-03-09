@@ -35,43 +35,47 @@ func on_input(event: InputEvent, viewport: Viewport) -> void:
 
 	viewport.set_input_as_handled()
 	var hint_letter = (event as InputEventKey).as_text_key_label().to_lower()
-	var jump_hint := _jump_hints.get(hint_letter) as JumpHint
-	if jump_hint == null:
+	if hint_letter not in _jump_hints:
 		return
+	var jump_hint := _jump_hints.get(hint_letter) as JumpHint
 	var jump_hint_position: Vector2i = jump_hint.text_editor_position
 	jump_position_received.emit(jump_hint_position)
 
 func _highlight_matches_async() -> void:
+	var carets := _add_carets_at_words_start()
+	await _create_and_start_timer(0.15).timeout
+	_jump_hints = _spawn_jump_hints(carets)
+	_text_editor.remove_secondary_carets()
+
+func _add_carets_at_words_start() -> Dictionary:
+	var carets: Dictionary = {} # caret_index (int): word_position (Vector2i)
 	var visible_lines_text := _get_visible_lines_text(_text_editor)
 	var whole_words := _get_words_starting_with_letter(visible_lines_text, _jump_letter)
-
 	var search_start := Vector2i(0, _text_editor.get_first_visible_line())
-	var hint_letter_code := 97 # ASCII code for 'a'
 	var main_caret_position := _text_editor.get_line_column_at_pos(_text_editor.get_caret_draw_pos())
-	var carets: Dictionary = {} # caret_index (int): word_position (Vector2i)
 	for word in whole_words:
 		var word_position := _text_editor.search(word, 2, search_start.y, search_start.x)
 		var caret_index := _text_editor.add_caret(word_position.y, word_position.x) if main_caret_position != word_position else 0
 		carets[caret_index] = word_position
 		print("word=%s, word_position=%s" % [word, word_position])
 		search_start = Vector2i(word_position.x + 1, word_position.y)
+	return carets
 
-	await _create_and_start_timer(0.15).timeout
-
+func _spawn_jump_hints(carets: Dictionary) -> Dictionary:
+	var jump_hints: Dictionary = {} # hint_letter (string): jump_hint (JumpHint)
+	var hint_letter_code := 97 # ASCII code for 'a'
 	for caret_index in carets:
-		var caret_draw_position := _text_editor.get_caret_draw_pos(caret_index)
-
 		var caret_word_position: Vector2i = carets[caret_index]
-		var hint_letter = char(hint_letter_code)
-		var jump_hint = _create_jump_hint(caret_word_position, hint_letter)
-		_jump_hints[hint_letter] = jump_hint
+		var hint_letter := char(hint_letter_code)
+		var jump_hint := _create_jump_hint(caret_word_position, hint_letter)
+		jump_hints[hint_letter] = jump_hint
+		var caret_draw_position := _text_editor.get_caret_draw_pos(caret_index)
 		_position_jump_hint(_text_editor, jump_hint.view, caret_draw_position)
 		_text_editor.add_child(jump_hint.view)
 
 		print("hint_letter=%s" % hint_letter)
 		hint_letter_code += 1
-
-	_text_editor.remove_secondary_carets()
+	return jump_hints
 
 func _create_jump_hint(text_editor_position: Vector2i, hint_letter: String) -> JumpHint:
 	var jump_hint := JumpHint.new()
