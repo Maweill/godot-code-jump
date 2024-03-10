@@ -4,13 +4,9 @@ extends EditorPlugin
 const CODE_JUMP_SETTING_NAME: StringName = &"plugin/code_jump/"
 const ACTIVATE_PLUGIN_SHORTCUT_SETTING_NAME: StringName = CODE_JUMP_SETTING_NAME + &"activate"
 
-#region Editor settings
-var activate_plugin_shortcut: Shortcut
-#endregion
-
 var _model: CJModel
-var current_state: CJState
-var states: Dictionary
+var _current_state: CJState
+var _states: Dictionary
 
 func _enter_tree() -> void:
 	_model = CJModel.new()
@@ -21,23 +17,28 @@ func _exit_tree() -> void:
 	pass
 
 func _unhandled_key_input(event: InputEvent) -> void:
-	current_state.on_input(event, get_viewport())
+	_current_state.on_input(event, get_viewport())
 
 func init_states() -> void:
 	var idle_state := CJIdleState.new()
 	var listen_jump_letter_state := CJListenJumpLetterState.new()
 	var listen_hint_letter_state := CJListenHintLetterState.new()
 	var jump_state := CJJumpState.new()
-	states[idle_state.get_type()] = idle_state
-	states[listen_jump_letter_state.get_type()] = listen_jump_letter_state
-	states[listen_hint_letter_state.get_type()] = listen_hint_letter_state
-	states[jump_state.get_type()] = jump_state
+	_states[idle_state.get_type()] = idle_state
+	_states[listen_jump_letter_state.get_type()] = listen_jump_letter_state
+	_states[listen_hint_letter_state.get_type()] = listen_hint_letter_state
+	_states[jump_state.get_type()] = jump_state
 
 	idle_state.plugin_activated.connect(func(): change_state(listen_jump_letter_state))
 	listen_jump_letter_state.jump_letter_received.connect(
 		func(letter: String):
 			_model.jump_letter = letter
 			change_state(listen_hint_letter_state)
+	)
+	listen_jump_letter_state.cancelled.connect(
+		func():
+			change_state(idle_state)
+			_model.text_editor.grab_focus()
 	)
 	listen_hint_letter_state.jump_position_received.connect(
 		func(position: Vector2i):
@@ -58,11 +59,11 @@ func update_model(model: CJModel) -> void:
 	model.text_editor = text_editor
 
 func change_state(state: CJState) -> void:
-	if current_state:
-		current_state.on_exit()
+	if _current_state:
+		_current_state.on_exit()
 	update_model(_model)
-	current_state = state
-	current_state.on_enter(_model)
+	_current_state = state
+	_current_state.on_enter(_model)
 
 func get_or_create_activate_plugin_shortcut(editor_settings: EditorSettings) -> Variant:
 	if (!editor_settings.has_setting(ACTIVATE_PLUGIN_SHORTCUT_SETTING_NAME)):

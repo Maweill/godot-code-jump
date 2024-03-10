@@ -2,6 +2,7 @@ class_name CJListenJumpLetterState
 extends CJState
 
 signal jump_letter_received(letter: String)
+signal cancelled()
 
 var _text_editor: TextEdit
 
@@ -19,7 +20,14 @@ func on_input(event: InputEvent, viewport: Viewport) -> void:
 		return
 
 	viewport.set_input_as_handled()
+
 	var jump_letter = (event as InputEventKey).as_text_key_label()
+	print("jump_letter=%s" % jump_letter)
+	var whole_words := CJUtils.get_visible_words_starting_with_letter(_text_editor, jump_letter)
+	if whole_words.size() == 0:
+		cancelled.emit()
+		return
+
 	jump_letter_received.emit(jump_letter)
 
 func get_type() -> int:

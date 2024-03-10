@@ -52,8 +52,7 @@ func _highlight_matches_async() -> void:
 
 func _add_carets_at_words_start() -> Dictionary:
 	var carets: Dictionary = {} # caret_index (int): word_position (Vector2i)
-	var visible_lines_text := _get_visible_lines_text(_text_editor)
-	var whole_words := _get_words_starting_with_letter(visible_lines_text, _jump_letter)
+	var whole_words := CJUtils.get_visible_words_starting_with_letter(_text_editor, _jump_letter)
 	var search_start := Vector2i(0, _text_editor.get_first_visible_line())
 	var main_caret_position := _text_editor.get_line_column_at_pos(_text_editor.get_caret_draw_pos())
 	for word in whole_words:
@@ -112,25 +111,6 @@ func _position_jump_hint(text_editor: TextEdit, jump_hint_view: Label, caret_pos
 	caret_position.y -= text_editor.get_line_height()
 	caret_position.x -= jump_hint_view.size.x / 2
 	jump_hint_view.set_position(caret_position)
-
-func _get_visible_lines_text(text_editor: TextEdit) -> String:
-	var first_visible_line_index := text_editor.get_first_visible_line()
-	var last_visible_line_index := text_editor.get_last_full_visible_line()
-	var lines := []
-	for line_index in range(first_visible_line_index, last_visible_line_index + 1):
-		lines.append(text_editor.get_line(line_index))
-	return "\n".join(lines)
-
-func _get_words_starting_with_letter(text: String, letter: String) -> Array[String]:
-	var regex := RegEx.new()
-	regex.compile("\\S+")
-	var words := regex.search_all(text)
-	var filtered_words: Array[String] = []
-	for word in words:
-		var word_string := word.get_string()
-		if word_string.to_lower().begins_with(letter.to_lower()): # Case-insensitive check
-			filtered_words.append(word_string)
-	return filtered_words
 
 func _get_editor_settings() -> EditorSettings:
 	return EditorInterface.get_editor_settings()
