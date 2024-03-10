@@ -8,8 +8,8 @@ class JumpHint:
 	func set_position(position: Vector2):
 		view.set_global_position(position)
 
-	func hide():
-		view.hide()
+	func destroy():
+		view.queue_free()
 
 signal jump_position_received(position: Vector2i)
 
@@ -27,7 +27,7 @@ func on_enter(model: CJModel) -> void:
 	_text_editor.release_focus()
 
 func on_exit() -> void:
-	_hide_jump_hints(_jump_hints)
+	_destroy_jump_hints(_jump_hints)
 
 func on_input(event: InputEvent, viewport: Viewport) -> void:
 	if not (event is InputEventKey and event.is_pressed()):
@@ -93,9 +93,10 @@ func _create_jump_hint_view(hint_letter: String) -> Label:
 	jump_hint_view.scale *= EditorInterface.get_editor_scale()
 	return jump_hint_view
 
-func _hide_jump_hints(hints: Dictionary) -> void:
+func _destroy_jump_hints(hints: Dictionary) -> void:
 	for hint: JumpHint in hints.values():
-		hint.hide()
+		hint.destroy()
+	hints.clear()
 
 func _create_and_start_timer(time_sec: float) -> Timer:
 	var timer = Timer.new()
