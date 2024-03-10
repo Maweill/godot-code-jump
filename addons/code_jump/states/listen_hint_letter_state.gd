@@ -43,9 +43,11 @@ func on_input(event: InputEvent, viewport: Viewport) -> void:
 
 func _highlight_matches_async() -> void:
 	var carets := _add_carets_at_words_start()
-	await _create_and_start_timer(0.15).timeout
+	var timer := _create_and_start_timer(0.15)
+	await timer.timeout
 	_jump_hints = _spawn_jump_hints(carets)
 	_text_editor.remove_secondary_carets()
+	timer.queue_free()
 
 func _add_carets_at_words_start() -> Dictionary:
 	var carets: Dictionary = {} # caret_index (int): word_position (Vector2i)
