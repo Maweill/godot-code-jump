@@ -21,10 +21,11 @@ var _jump_hints: Dictionary = {}
 func on_enter(model: CJModel) -> void:
 	_text_editor = model.text_editor
 	_jump_letter = model.jump_letter
-
 	_text_editor.grab_focus()
 	await _highlight_matches_async()
 	_text_editor.release_focus()
+
+	print("listening for hint key")
 
 func on_exit() -> void:
 	_destroy_jump_hints(_jump_hints)
@@ -121,20 +122,14 @@ func _get_visible_lines_text(text_editor: TextEdit) -> String:
 	return "\n".join(lines)
 
 func _get_words_starting_with_letter(text: String, letter: String) -> Array[String]:
-	# Regular expression to split the text by non-word characters
 	var regex := RegEx.new()
-	regex.compile("\\w+")
-
-	# Split the string into words using the regex
+	regex.compile("\\S+")
 	var words := regex.search_all(text)
-
-	# Filter words that start with 'm'
 	var filtered_words: Array[String] = []
 	for word in words:
 		var word_string := word.get_string()
-		if word_string.begins_with(letter.to_lower()) or word_string.begins_with(letter.capitalize()): # Case-insensitive check
+		if word_string.to_lower().begins_with(letter.to_lower()): # Case-insensitive check
 			filtered_words.append(word_string)
-
 	return filtered_words
 
 func _get_editor_settings() -> EditorSettings:
