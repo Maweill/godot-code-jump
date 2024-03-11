@@ -45,6 +45,11 @@ func init_states() -> void:
 			_model.jump_position = position
 			change_state(jump_state)
 	)
+	listen_hint_letter_state.cancelled.connect(
+		func():
+			change_state(idle_state)
+			_model.text_editor.grab_focus()
+	)
 	jump_state.jumped.connect(func(): change_state(idle_state))
 
 	change_state(idle_state)

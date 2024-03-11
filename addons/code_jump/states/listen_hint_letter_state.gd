@@ -12,6 +12,7 @@ class JumpHint:
 		view.queue_free()
 
 signal jump_position_received(position: Vector2i)
+signal cancelled()
 
 var _jump_hint_scene: PackedScene = preload("res://addons/code_jump/jump_hint.tscn")
 var _text_editor: TextEdit
@@ -35,7 +36,12 @@ func on_input(event: InputEvent, viewport: Viewport) -> void:
 		return
 
 	viewport.set_input_as_handled()
-	var hint_letter = (event as InputEventKey).as_text_key_label().to_lower()
+	var input_event_key: InputEventKey = event as InputEventKey
+	if input_event_key.keycode == KEY_ESCAPE:
+		cancelled.emit()
+		return
+
+	var hint_letter = input_event_key.as_text_key_label().to_lower()
 	if hint_letter not in _jump_hints:
 		return
 	var jump_hint := _jump_hints.get(hint_letter) as JumpHint
