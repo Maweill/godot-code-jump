@@ -22,14 +22,15 @@
 			"title": "Todo",
 			"tasks": [
 				"3f0b899d-8bdc-40b6-aee3-0c3d5c3f5836",
-				"88fcf58d-e333-49a0-a3e4-3ffdc6f7f8bc",
-				"92c03229-8ad7-4f8d-8061-7f037dbc92a7"
+				"88fcf58d-e333-49a0-a3e4-3ffdc6f7f8bc"
 			]
 		},
 		{
 			"uuid": "f3d48a57-61e4-4a5b-a494-fbaf5320de52",
 			"title": "Doing",
-			"tasks": []
+			"tasks": [
+				"92c03229-8ad7-4f8d-8061-7f037dbc92a7"
+			]
 		},
 		{
 			"uuid": "6f48844d-c06c-4511-bbaf-6141d0151d6a",
@@ -72,9 +73,26 @@
 		{
 			"uuid": "92c03229-8ad7-4f8d-8061-7f037dbc92a7",
 			"title": "Слова внутри скобочек не учитываются в поиске",
-			"description": "Стоит проверить и другие знаки.",
+			"description": "Стоит проверить и другие знаки.\n",
 			"category": "707202ac-359b-4888-8e9f-47fb8bd90588",
-			"steps": []
+			"steps": [
+				{
+					"details": "(word",
+					"done": false
+				},
+				{
+					"details": "search_start.x - до x не добраться",
+					"done": false
+				},
+				{
+					"details": "[word",
+					"done": false
+				},
+				{
+					"details": "{word",
+					"done": false
+				}
+			]
 		}
 	],
 	"layout": {
