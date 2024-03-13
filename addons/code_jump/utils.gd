@@ -14,11 +14,9 @@ static func get_visible_lines_text(text_editor: TextEdit) -> String:
 
 static func get_words_starting_with_letter(text: String, letter: String) -> Array[String]:
 	var regex := RegEx.new()
-	regex.compile("\\S+")
+	regex.compile("(?i)\\b(?<![@$])" + letter + "[\\w-]*\\b")
 	var words := regex.search_all(text)
 	var filtered_words: Array[String] = []
 	for word in words:
-		var word_string := word.get_string()
-		if word_string.to_lower().begins_with(letter.to_lower()): # Case-insensitive check
-			filtered_words.append(word_string)
+		filtered_words.append(word.get_string())
 	return filtered_words
