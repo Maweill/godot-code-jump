@@ -14,7 +14,7 @@ class JumpHint:
 signal jump_position_received(position: Vector2i)
 signal cancelled()
 
-var _jump_hint_scene: PackedScene = preload("res://addons/code_jump/jump_hint.tscn")
+var _jump_hint_scene: PackedScene = preload("res://addons/code_jump/src/views/jump_hint.tscn")
 var _text_editor: TextEdit
 var _jump_letter: String
 var _jump_hints: Dictionary = {}

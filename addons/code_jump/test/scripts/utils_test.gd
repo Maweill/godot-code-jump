@@ -5,7 +5,7 @@ extends GdUnitTestSuite
 @warning_ignore('return_value_discarded')
 
 # TestSuite generated from
-const __source = 'res://addons/code_jump/utils.gd'
+const __source = 'res://addons/code_jump/src/scripts/utils.gd'
 
 
 func test_get_words_starting_with_letter() -> void:
@@ -15,7 +15,7 @@ func test_get_words_starting_with_letter() -> void:
 	var result1 = CJUtils.get_words_starting_with_letter(text1, "a")
 	assert_array(result1).is_equal(expected1)
 
-	# Test case 2: Case-insensitivity
+	# Test case 2: Case-insensitivity м
 	var text2 = "Apple Banana Cherry Date"
 	var expected2 = ["Apple"]
 	var result2 = CJUtils.get_words_starting_with_letter(text2, "a")
