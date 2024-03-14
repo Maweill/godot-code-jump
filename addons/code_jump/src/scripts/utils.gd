@@ -18,7 +18,13 @@ static func get_words_starting_with_letter(text: String, letter: String) -> Arra
 	var words := regex.search_all(text)
 	var filtered_words: Array[String] = []
 	for word in words:
-		var word_string := word.get_string()
-		if word_string.to_lower().begins_with(letter.to_lower()): # Case-insensitive check
+		var word_string = word.get_string()
+		var word_string_lower := word_string.to_lower()
+		var letter_lower = letter.to_lower()
+		if word_string_lower.begins_with(letter_lower):
+			filtered_words.append(word_string)
+		elif word_string.begins_with("_") \
+		and word_string.length() > 1 \
+		and word_string_lower[1] == letter_lower:
 			filtered_words.append(word_string)
 	return filtered_words

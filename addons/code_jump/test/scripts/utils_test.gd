@@ -85,4 +85,10 @@ func test_cyrillic_characters() -> void:
 	var expected = ["тест"]
 	var result = CJUtils.get_words_starting_with_letter(text, "т")
 	assert_array(result).is_equal(expected)
+
+func test_variable_name_with_undescore_prefix() -> void:
+	var text = "_variable_name.v"
+	var expected = ["_variable_name", "v"]
+	var result = CJUtils.get_words_starting_with_letter(text, "v")
+	assert_array(result).is_equal(expected)
 #endregion
