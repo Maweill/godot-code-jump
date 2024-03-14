@@ -7,82 +7,82 @@ extends GdUnitTestSuite
 # TestSuite generated from
 const __source = 'res://addons/code_jump/src/scripts/utils.gd'
 
+#region Tests of get_words_starting_with_letter()
+func test_basic_functionality() -> void:
+	var text = "apple banana cherry date"
+	var expected = ["apple"]
+	var result = CJUtils.get_words_starting_with_letter(text, "a")
+	assert_array(result).is_equal(expected)
 
-func test_get_words_starting_with_letter() -> void:
-	# Test case 1: Basic functionality
-	var text1 = "apple banana cherry date"
-	var expected1 = ["apple"]
-	var result1 = CJUtils.get_words_starting_with_letter(text1, "a")
-	assert_array(result1).is_equal(expected1)
+func test_case_insensitivity() -> void:
+	var text = "Apple Banana Cherry Date"
+	var expected = ["Apple"]
+	var result = CJUtils.get_words_starting_with_letter(text, "a")
+	assert_array(result).is_equal(expected)
 
-	# Test case 2: Case-insensitivity м
-	var text2 = "Apple Banana Cherry Date"
-	var expected2 = ["Apple"]
-	var result2 = CJUtils.get_words_starting_with_letter(text2, "a")
-	assert_array(result2).is_equal(expected2)
+func test_words_with_symbols_before_letter() -> void:
+	var text = "(apple) [banana] {cherry} date"
+	var expected = ["apple"]
+	var result = CJUtils.get_words_starting_with_letter(text, "a")
+	assert_array(result).is_equal(expected)
 
-	# Test case 3: Words with symbols before the letter
-	var text3 = "(apple) [banana] {cherry} date"
-	var expected3 = ["apple"]
-	var result3 = CJUtils.get_words_starting_with_letter(text3, "a")
-	assert_array(result3).is_equal(expected3)
+func test_words_with_multiple_symbols_before_letter() -> void:
+	var text = "{[apple]} [[banana]] {{cherry}} date"
+	var expected = ["apple"]
+	var result = CJUtils.get_words_starting_with_letter(text, "a")
+	assert_array(result).is_equal(expected)
 
-	# Test case 4: Words with multiple symbols before the letter
-	var text4 = "{[apple]} [[banana]] {{cherry}} date"
-	var expected4 = ["apple"]
-	var result4 = CJUtils.get_words_starting_with_letter(text4, "a")
-	assert_array(result4).is_equal(expected4)
+func test_no_matching_words() -> void:
+	var text = "apple banana cherry date"
+	var expected = []
+	var result = CJUtils.get_words_starting_with_letter(text, "x")
+	assert_array(result).is_equal(expected)
 
-	# Test case 5: No matching words
-	var text5 = "apple banana cherry date"
-	var expected5 = []
-	var result5 = CJUtils.get_words_starting_with_letter(text5, "x")
-	assert_array(result5).is_equal(expected5)
+func test_empty_string() -> void:
+	var text = ""
+	var expected = []
+	var result = CJUtils.get_words_starting_with_letter(text, "a")
+	assert_array(result).is_equal(expected)
 
-	# Test case 6: Empty string
-	var text6 = ""
-	var expected6 = []
-	var result6 = CJUtils.get_words_starting_with_letter(text6, "a")
-	assert_array(result6).is_equal(expected6)
+func test_special_characters_and_numbers() -> void:
+	var text = "apple123 @banana $cherry date"
+	var expected = ["apple123"]
+	var result = CJUtils.get_words_starting_with_letter(text, "a")
+	assert_array(result).is_equal(expected)
 
-	# Test case 7: Special characters and numbers
-	var text7 = "apple123 @banana $cherry date"
-	var expected7 = ["apple123"]
-	var result7 = CJUtils.get_words_starting_with_letter(text7, "a")
-	assert_array(result7).is_equal(expected7)
+func test_uppercase_letter_as_input() -> void:
+	var text = "Apple Banana Cherry Date"
+	var expected = ["Apple"]
+	var result = CJUtils.get_words_starting_with_letter(text, "A")
+	assert_array(result).is_equal(expected)
 
-	# Test case 8: Uppercase letter as input
-	var text8 = "Apple Banana Cherry Date"
-	var expected8 = ["Apple"]
-	var result8 = CJUtils.get_words_starting_with_letter(text8, "A")
-	assert_array(result8).is_equal(expected8)
+func test_multiple_occurrences_of_same_word() -> void:
+	var text = "apple banana apple cherry apple date"
+	var expected = ["apple", "apple", "apple"]
+	var result = CJUtils.get_words_starting_with_letter(text, "a")
+	assert_array(result).is_equal(expected)
 
-	# Test case 9: Multiple occurrences of the same word
-	var text9 = "apple banana apple cherry apple date"
-	var expected9 = ["apple", "apple", "apple"]
-	var result9 = CJUtils.get_words_starting_with_letter(text9, "a")
-	assert_array(result9).is_equal(expected9)
+func test_words_with_hyphens_and_underscores() -> void:
+	var text = "apple-pie banana_split cherry-date"
+	var expected = ["apple-pie"]
+	var result = CJUtils.get_words_starting_with_letter(text, "a")
+	assert_array(result).is_equal(expected)
 
-	# Test case 10: Words with hyphens and underscores
-	var text10 = "apple-pie banana_split cherry-date"
-	var expected10 = ["apple-pie"]
-	var result10 = CJUtils.get_words_starting_with_letter(text10, "a")
-	assert_array(result10).is_equal(expected10)
+func test_function_name_with_parameters() -> void:
+	var text = "function_name(text String)"
+	var expected = ["text"]
+	var result = CJUtils.get_words_starting_with_letter(text, "t")
+	assert_array(result).is_equal(expected)
 
-	# Test case 11:
-	var text11 = "function_name(text String)"
-	var expected11 = ["text"]
-	var result11 = CJUtils.get_words_starting_with_letter(text11, "t")
-	assert_array(result11).is_equal(expected11)
+func test_variable_name_with_dot_notation() -> void:
+	var text = "variable_name.v"
+	var expected = ["variable_name", "v"]
+	var result = CJUtils.get_words_starting_with_letter(text, "v")
+	assert_array(result).is_equal(expected)
 
-	# Test case 12:
-	var text12 = "variable_name.x"
-	var expected12 = ["x"]
-	var result12 = CJUtils.get_words_starting_with_letter(text12, "x")
-	assert_array(result12).is_equal(expected12)
-
-	# Test case 13:
-	var text13 = "pple123 @pple $pple pple"
-	var expected13 = ["pple123", "pple"]
-	var result13 = CJUtils.get_words_starting_with_letter(text13, "p")
-	assert_array(result13).is_equal(expected13)
+func test_cyrillic_characters() -> void:
+	var text = "pple123 тест"
+	var expected = ["тест"]
+	var result = CJUtils.get_words_starting_with_letter(text, "т")
+	assert_array(result).is_equal(expected)
+#endregion
