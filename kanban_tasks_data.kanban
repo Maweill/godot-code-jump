@@ -12,27 +12,37 @@
 		},
 		{
 			"uuid": "0453c5b0-2b5a-4019-bf86-f5624ef6516e",
-			"title": "Refactor",
+			"title": "Refactoring",
 			"color": "145fda"
 		}
 	],
 	"stages": [
 		{
 			"uuid": "cd12d4fb-12a2-4744-88a0-2e79754c162e",
-			"title": "Todo",
+			"title": "Ideas",
 			"tasks": [
 				"3f0b899d-8bdc-40b6-aee3-0c3d5c3f5836",
-				"47450b6f-e26a-4c84-a2b8-a2db0c0cb5e4",
-				"ef64dd67-1bce-4c5f-ac27-754806997ba8"
+				"47450b6f-e26a-4c84-a2b8-a2db0c0cb5e4"
 			]
 		},
 		{
 			"uuid": "f3d48a57-61e4-4a5b-a494-fbaf5320de52",
-			"title": "Doing",
-			"tasks": []
+			"title": "Todo",
+			"tasks": [
+				"666f5a5e-9d28-4c8d-9f87-f568b8d45b9b",
+				"655fde99-a77f-4757-a25e-50cd538d4b8a",
+				"3e7380a5-dd78-46ec-bae9-be3ee82d9fa9"
+			]
 		},
 		{
 			"uuid": "6f48844d-c06c-4511-bbaf-6141d0151d6a",
+			"title": "In Progress",
+			"tasks": [
+				"ef64dd67-1bce-4c5f-ac27-754806997ba8"
+			]
+		},
+		{
+			"uuid": "e12a7467-7755-423b-b3bb-2923107218de",
 			"title": "Done",
 			"tasks": [
 				"e0e1e4d0-cbd0-4d73-843f-a7f4002cdea7",
@@ -106,7 +116,7 @@
 		{
 			"uuid": "ef64dd67-1bce-4c5f-ac27-754806997ba8",
 			"title": "Если букв больше, чем в алфавите, то варианты кончаются",
-			"description": "Если алфавит кончился, а нужны еще буквы, то все варианты должны состоять из двух букв.",
+			"description": "Если алфавит кончился, а нужны еще буквы, то несколько первых вариантов должны состоять из двух букв.",
 			"category": "707202ac-359b-4888-8e9f-47fb8bd90588",
 			"steps": []
 		},
@@ -114,6 +124,27 @@
 			"uuid": "4fcda337-2fce-46ab-90c7-c59f384434d6",
 			"title": "Распределить файлы внутри code_jump по папкам",
 			"description": "Все данные переместить в src. Чтобы осталось src, test, plugin.cfg",
+			"category": "0453c5b0-2b5a-4019-bf86-f5624ef6516e",
+			"steps": []
+		},
+		{
+			"uuid": "655fde99-a77f-4757-a25e-50cd538d4b8a",
+			"title": "Фон подсказки в дефолтной теме слишком широкий",
+			"description": "",
+			"category": "707202ac-359b-4888-8e9f-47fb8bd90588",
+			"steps": []
+		},
+		{
+			"uuid": "666f5a5e-9d28-4c8d-9f87-f568b8d45b9b",
+			"title": "Составить структуру из line и column",
+			"description": "Очень часто куда-то передаются и используются вместе.",
+			"category": "0453c5b0-2b5a-4019-bf86-f5624ef6516e",
+			"steps": []
+		},
+		{
+			"uuid": "3e7380a5-dd78-46ec-bae9-be3ee82d9fa9",
+			"title": "Пометить все скрипты как @tool",
+			"description": "",
 			"category": "0453c5b0-2b5a-4019-bf86-f5624ef6516e",
 			"steps": []
 		}
@@ -128,6 +159,9 @@
 			],
 			[
 				"6f48844d-c06c-4511-bbaf-6141d0151d6a"
+			],
+			[
+				"e12a7467-7755-423b-b3bb-2923107218de"
 			]
 		]
 	}
