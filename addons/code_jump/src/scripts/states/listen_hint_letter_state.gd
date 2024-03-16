@@ -2,7 +2,7 @@ class_name CJListenHintLetterState
 extends CJState
 
 class JumpHint:
-	var text_editor_position: Vector2i
+	var text_editor_position: CJTextPosition
 	var view: Label
 
 	func get_text() -> String:
@@ -14,7 +14,7 @@ class JumpHint:
 	func destroy() -> void:
 		view.queue_free()
 
-signal jump_position_received(position: Vector2i)
+signal jump_position_received(position: CJTextPosition)
 signal cancelled()
 
 const LATIN_LETTERS_COUNT := 25
@@ -29,7 +29,8 @@ func on_enter(model: CJModel) -> void:
 	_text_editor = model.text_editor
 	_jump_letter = model.jump_letter
 	_text_editor.grab_focus()
-	await _highlight_matches_async(_text_editor.get_first_visible_line(), 0, _text_editor.get_last_full_visible_line() + 1)
+	var highlight_from_position = CJTextPosition.new(_text_editor.get_first_visible_line(), 0)
+	await _highlight_matches_async(highlight_from_position, _text_editor.get_last_full_visible_line() + 1)
 	_text_editor.release_focus()
 
 	print("listening for hint key")
@@ -63,17 +64,13 @@ func on_input(event: InputEvent, viewport: Viewport) -> void:
 		_destroy_jump_hints(_jump_hints_single)
 		_destroy_jump_hints(_jump_hints_double)
 
-		_highlight_matches_async(
-			first_double_hint_position.y,
-			first_double_hint_position.x,
-			last_double_hint_position.y
-		)
+		_highlight_matches_async(first_double_hint_position, last_double_hint_position.line)
 		return
 
 	if hint_letter not in _jump_hints_single:
 		return
 	var jump_hint := _jump_hints_single.get(hint_letter) as JumpHint
-	var jump_hint_position: Vector2i = jump_hint.text_editor_position
+	var jump_hint_position: CJTextPosition = jump_hint.text_editor_position
 	jump_position_received.emit(jump_hint_position)
 
 func _get_hint_double(letter: String) -> JumpHint:
@@ -84,11 +81,11 @@ func _get_hint_double(letter: String) -> JumpHint:
 			break
 	return result_hint
 
-func _get_last_double_hint_position() -> Vector2i:
+func _get_last_double_hint_position() -> CJTextPosition:
 	return (_jump_hints_double.values()[_jump_hints_double.values().size() - 1] as JumpHint).text_editor_position
 
-func _highlight_matches_async(from_line: int, from_column: int, to_line: int) -> void:
-	var carets := _add_carets_at_words_start(from_line, from_column, to_line)
+func _highlight_matches_async(from_position: CJTextPosition, to_line: int) -> void:
+	var carets := _add_carets_at_words_start(from_position, to_line)
 	var timer := _create_and_start_timer(0.3)
 	await timer.timeout
 	var jump_hints := _spawn_jump_hints(carets)
@@ -97,18 +94,18 @@ func _highlight_matches_async(from_line: int, from_column: int, to_line: int) ->
 	_text_editor.remove_secondary_carets()
 	timer.queue_free()
 
-func _add_carets_at_words_start(from_line: int, from_column: int, to_line: int) -> Dictionary:
-	var carets: Dictionary = {} # caret_index (int): word_position (Vector2i)
-	var whole_words := CJUtils.get_visible_words_starting_with_letter(_text_editor, _jump_letter, from_line, to_line)
-	var search_start := Vector2i(from_column, from_line)
+func _add_carets_at_words_start(from_position: CJTextPosition, to_line: int) -> Dictionary:
+	var carets: Dictionary = {} # caret_index (int): word_position (CJTextPosition)
+	var whole_words := CJUtils.get_visible_words_starting_with_letter(_text_editor, _jump_letter, from_position.line, to_line)
+	var search_start := from_position
 	var main_caret_position := _text_editor.get_line_column_at_pos(_text_editor.get_caret_draw_pos())
 	print("search_start=%s" % search_start)
 	for word in whole_words:
-		var word_position := _text_editor.search(word, 2, search_start.y, search_start.x)
+		var word_position := _text_editor.search(word, 2, search_start.line, search_start.column)
 		var caret_index := _text_editor.add_caret(word_position.y, word_position.x) if main_caret_position != word_position else 0
-		carets[caret_index] = word_position
+		carets[caret_index] = CJTextPosition.new(word_position.y, word_position.x)
 		print("word=%s, word_position=%s" % [word, word_position])
-		search_start = Vector2i(word_position.x + 1, word_position.y)
+		search_start = CJTextPosition.new(word_position.y, word_position.x + 1)
 	return carets
 
 func _spawn_jump_hints(carets: Dictionary) -> Dictionary:
@@ -121,7 +118,7 @@ func _spawn_jump_hints(carets: Dictionary) -> Dictionary:
 	var jump_hints_single: Dictionary = {} # hint_letter (string): jump_hint (JumpHint)
 	var jump_hints_double: Dictionary = {}
 	for caret_index in carets:
-		var caret_word_position: Vector2i = carets[caret_index]
+		var caret_word_position: CJTextPosition = carets[caret_index]
 		var hint_letter := ""
 
 		if double_letter_count > 0:
@@ -152,7 +149,7 @@ func _spawn_jump_hints(carets: Dictionary) -> Dictionary:
 
 	return {"single": jump_hints_single, "double": jump_hints_double}
 
-func _create_jump_hint(text_editor_position: Vector2i, hint_letter: String) -> JumpHint:
+func _create_jump_hint(text_editor_position: CJTextPosition, hint_letter: String) -> JumpHint:
 	var jump_hint := JumpHint.new()
 	jump_hint.view = _create_jump_hint_view(hint_letter)
 	jump_hint.text_editor_position = text_editor_position
@@ -180,7 +177,7 @@ func _create_and_start_timer(time_sec: float) -> Timer:
 	timer.start(time_sec)
 	return timer
 
-func _position_jump_hint(text_editor: TextEdit, jump_hint_view: Label, caret_position: Vector2i) -> void:
+func _position_jump_hint(text_editor: TextEdit, jump_hint_view: Label, caret_position: Vector2) -> void:
 	caret_position.y -= text_editor.get_line_height()
 	caret_position.x -= jump_hint_view.size.x / 2
 	jump_hint_view.set_position(caret_position)

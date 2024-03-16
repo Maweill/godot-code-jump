@@ -41,7 +41,7 @@ func init_states() -> void:
 			_model.text_editor.grab_focus()
 	)
 	listen_hint_letter_state.jump_position_received.connect(
-		func(position: Vector2i):
+		func(position: CJTextPosition):
 			_model.jump_position = position
 			change_state(jump_state)
 	)
