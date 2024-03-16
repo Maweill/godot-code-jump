@@ -71,18 +71,40 @@ func _add_carets_at_words_start() -> Dictionary:
 
 func _spawn_jump_hints(carets: Dictionary) -> Dictionary:
 	var jump_hints: Dictionary = {} # hint_letter (string): jump_hint (JumpHint)
-	var hint_letter_code := 97 # ASCII code for 'a'
+
+	var double_letter_count := 0
+	if carets.size() > 25:
+		double_letter_count = carets.size() - 25
+
+	var first_letter_code := 97 # ASCII code for 'a'
+	var second_letter_code := 97
+	var double_letter_used := double_letter_count > 0
+	print("carets count = %s" % carets.size())
 	for caret_index in carets:
 		var caret_word_position: Vector2i = carets[caret_index]
-		var hint_letter := char(hint_letter_code)
+		var hint_letter := ""
+
+		if double_letter_count > 0:
+			hint_letter = char(first_letter_code) + char(second_letter_code)
+			second_letter_code += 1
+			if second_letter_code > 122: # ASCII code for 'z'
+				first_letter_code += 1
+				second_letter_code = 97
+			double_letter_count -= 1
+		else:
+			if double_letter_used:
+				first_letter_code += 1
+				double_letter_used = false
+			hint_letter = char(first_letter_code)
+			first_letter_code += 1
+
 		var jump_hint := _create_jump_hint(caret_word_position, hint_letter)
 		jump_hints[hint_letter] = jump_hint
 		var caret_draw_position := _text_editor.get_caret_draw_pos(caret_index)
 		_position_jump_hint(_text_editor, jump_hint.view, caret_draw_position)
 		_text_editor.add_child(jump_hint.view)
-
 		print("hint_letter=%s" % hint_letter)
-		hint_letter_code += 1
+
 	return jump_hints
 
 func _create_jump_hint(text_editor_position: Vector2i, hint_letter: String) -> JumpHint:

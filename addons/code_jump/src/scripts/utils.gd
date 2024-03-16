@@ -6,7 +6,7 @@ static func get_visible_words_starting_with_letter(text_editor: TextEdit, letter
 
 static func get_visible_lines_text(text_editor: TextEdit) -> String:
 	var first_visible_line_index := text_editor.get_first_visible_line()
-	var last_visible_line_index := text_editor.get_last_full_visible_line()
+	var last_visible_line_index := text_editor.get_last_full_visible_line() + 1 # Correct last visible row
 	var lines := []
 	for line_index in range(first_visible_line_index, last_visible_line_index + 1):
 		lines.append(text_editor.get_line(line_index))
