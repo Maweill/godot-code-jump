@@ -1,14 +1,12 @@
 class_name CJUtils
 
-static func get_visible_words_starting_with_letter(text_editor: TextEdit, letter: String) -> Array[String]:
-	var visible_lines_text := get_visible_lines_text(text_editor)
+static func get_visible_words_starting_with_letter(text_editor: TextEdit, letter: String, from_line: int, to_line: int) -> Array[String]:
+	var visible_lines_text := get_visible_lines_text(text_editor, from_line, to_line)
 	return get_words_starting_with_letter(visible_lines_text, letter)
 
-static func get_visible_lines_text(text_editor: TextEdit) -> String:
-	var first_visible_line_index := text_editor.get_first_visible_line()
-	var last_visible_line_index := text_editor.get_last_full_visible_line() + 1 # Correct last visible row
+static func get_visible_lines_text(text_editor: TextEdit, from_line: int, to_line: int) -> String:
 	var lines := []
-	for line_index in range(first_visible_line_index, last_visible_line_index + 1):
+	for line_index in range(from_line, to_line + 1):
 		lines.append(text_editor.get_line(line_index))
 	return "\n".join(lines)
 

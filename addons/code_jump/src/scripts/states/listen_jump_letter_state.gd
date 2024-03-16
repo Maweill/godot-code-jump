@@ -23,7 +23,12 @@ func on_input(event: InputEvent, viewport: Viewport) -> void:
 
 	var jump_letter = (event as InputEventKey).as_text_key_label()
 	print("jump_letter=%s" % jump_letter)
-	var whole_words := CJUtils.get_visible_words_starting_with_letter(_text_editor, jump_letter)
+	var whole_words := CJUtils.get_visible_words_starting_with_letter(
+		_text_editor,
+		jump_letter,
+		_text_editor.get_first_visible_line(),
+		_text_editor.get_last_full_visible_line() + 1
+	)
 	if whole_words.size() == 0:
 		cancelled.emit()
 		return
