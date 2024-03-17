@@ -14,6 +14,11 @@
 			"uuid": "0453c5b0-2b5a-4019-bf86-f5624ef6516e",
 			"title": "Refactoring",
 			"color": "145fda"
+		},
+		{
+			"uuid": "bb1f5bd1-6f3f-4210-9ea9-4471055c508c",
+			"title": "Chore",
+			"color": "e5f329"
 		}
 	],
 	"stages": [
@@ -29,17 +34,15 @@
 			"uuid": "f3d48a57-61e4-4a5b-a494-fbaf5320de52",
 			"title": "Todo",
 			"tasks": [
-				"666f5a5e-9d28-4c8d-9f87-f568b8d45b9b",
 				"655fde99-a77f-4757-a25e-50cd538d4b8a",
-				"3e7380a5-dd78-46ec-bae9-be3ee82d9fa9"
+				"3e7380a5-dd78-46ec-bae9-be3ee82d9fa9",
+				"d04b6ec8-212b-45cb-abff-dc8ffd422271"
 			]
 		},
 		{
 			"uuid": "6f48844d-c06c-4511-bbaf-6141d0151d6a",
 			"title": "In Progress",
-			"tasks": [
-				"ef64dd67-1bce-4c5f-ac27-754806997ba8"
-			]
+			"tasks": []
 		},
 		{
 			"uuid": "e12a7467-7755-423b-b3bb-2923107218de",
@@ -49,7 +52,9 @@
 				"bb72d8ba-c0ba-4bcf-9178-f10227e06fbd",
 				"92c03229-8ad7-4f8d-8061-7f037dbc92a7",
 				"4fcda337-2fce-46ab-90c7-c59f384434d6",
-				"88fcf58d-e333-49a0-a3e4-3ffdc6f7f8bc"
+				"88fcf58d-e333-49a0-a3e4-3ffdc6f7f8bc",
+				"666f5a5e-9d28-4c8d-9f87-f568b8d45b9b",
+				"ef64dd67-1bce-4c5f-ac27-754806997ba8"
 			]
 		}
 	],
@@ -146,6 +151,13 @@
 			"title": "Пометить все скрипты как @tool",
 			"description": "",
 			"category": "0453c5b0-2b5a-4019-bf86-f5624ef6516e",
+			"steps": []
+		},
+		{
+			"uuid": "d04b6ec8-212b-45cb-abff-dc8ffd422271",
+			"title": "Добавить линтер",
+			"description": "",
+			"category": "bb1f5bd1-6f3f-4210-9ea9-4471055c508c",
 			"steps": []
 		}
 	],

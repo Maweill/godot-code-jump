@@ -106,7 +106,6 @@ func _spawn_jump_hints(carets: Dictionary) -> Array[JumpHint]:
 		var caret_word_position: CJTextPosition = carets[caret_index]
 		var hint_text := ""
 
-		#TODO Move to _get_hint_text() -> String
 		if double_letter_count > 0:
 			hint_text = char(first_letter_code) + char(second_letter_code)
 			second_letter_code += 1
