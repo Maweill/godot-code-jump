@@ -3,6 +3,7 @@ extends CJState
 
 signal jumped
 
+
 func on_enter(model: CJModel) -> void:
 	print("enter jump_state")
 	var text_editor := model.text_editor
@@ -12,8 +13,10 @@ func on_enter(model: CJModel) -> void:
 	text_editor.set_caret_column(jump_position.column, false)
 	jumped.emit()
 
+
 func on_exit() -> void:
 	pass
+
 
 func get_type() -> int:
 	return CJStateType.JUMP
