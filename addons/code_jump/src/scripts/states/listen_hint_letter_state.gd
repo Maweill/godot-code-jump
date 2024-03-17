@@ -50,43 +50,27 @@ func on_input(event: InputEvent, viewport: Viewport) -> void:
 		return
 
 	var hint_letter = input_event_key.as_text_key_label().to_lower()
-	var double_hint := _get_hint_double(hint_letter)
-	if double_hint != null:
-		# spawn single hints starting from the second letter of hint found
+
+	var double_hints_starting_with_letter := _get_double_hints_starting_with_letter(hint_letter)
+	if double_hints_starting_with_letter.size() > 0:
+		var double_hint := double_hints_starting_with_letter.front() as JumpHint
 		var hint_second_letter := double_hint.get_text()[1]
 		print("hint_second_letter=%s" % hint_second_letter)
 
 		var first_double_hint_position := double_hint.text_editor_position
-		var last_double_hint_position := _get_last_double_hint_position()
+		var last_double_hint_starting_with_letter := _get_double_hints_starting_with_letter(hint_letter).back() as JumpHint
+		var last_double_hint_position := last_double_hint_starting_with_letter.text_editor_position
 
 		_destroy_jump_hints(_jump_hints)
 
 		_highlight_matches_async(first_double_hint_position, last_double_hint_position.line)
 		return
 
-	var jump_hint := GD_.find(_jump_hints, func(hint: JumpHint, _index): return hint.get_text() == hint_letter) as JumpHint
+	var jump_hint := _find_jump_hint(hint_letter)
 	if jump_hint == null:
 		return
 	var jump_hint_position: CJTextPosition = jump_hint.text_editor_position
 	jump_position_received.emit(jump_hint_position)
-
-func _get_hint_double(letter: String) -> JumpHint:
-	var result_hint: JumpHint = null
-	for hint: JumpHint in _jump_hints:
-		var hint_text := hint.get_text()
-		if hint_text.length() == 2 and hint_text.begins_with(letter):
-			result_hint = hint
-			break
-	return result_hint
-
-func _get_last_double_hint_position() -> CJTextPosition:
-	var last_double_hint_position: CJTextPosition = null
-	for i in range(_jump_hints.size() - 1, 0, -1):
-		var hint := _jump_hints[i]
-		if hint.get_text().length() == 2:
-			last_double_hint_position = hint.text_editor_position
-			break
-	return last_double_hint_position
 
 func _highlight_matches_async(from_position: CJTextPosition, to_line: int) -> void:
 	var carets := _add_carets_at_words_start(from_position, to_line)
@@ -181,6 +165,15 @@ func _position_jump_hint(text_editor: TextEdit, jump_hint_view: Label, caret_pos
 
 func _get_editor_settings() -> EditorSettings:
 	return EditorInterface.get_editor_settings()
+
+func _get_double_hints_starting_with_letter(letter: String) -> Array[JumpHint]:
+	return _get_double_hints().filter(func(hint: JumpHint): return hint.get_text().begins_with(letter))
+
+func _get_double_hints() -> Array[JumpHint]:
+	return _jump_hints.filter(func(hint: JumpHint): return hint.get_text().length() == 2)
+
+func _find_jump_hint(hint_text: String) -> JumpHint:
+	return GD_.find(_jump_hints, func(hint: JumpHint, _index): return hint.get_text() == hint_text) as JumpHint
 
 func get_type() -> int:
 	return CJStateType.LISTEN_HINT_LETTER
