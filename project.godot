@@ -36,6 +36,12 @@ version_control/autoload_on_startup=true
 
 enabled=PackedStringArray("res://addons/code_jump/plugin.cfg", "res://addons/gdUnit4/plugin.cfg", "res://addons/kanban_tasks/plugin.cfg", "res://addons/script-ide/plugin.cfg")
 
+[file_customization]
+
+folder_colors={
+"res://addons/code_jump/": "blue"
+}
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
