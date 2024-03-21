@@ -34,7 +34,7 @@
 			"uuid": "f3d48a57-61e4-4a5b-a494-fbaf5320de52",
 			"title": "Todo",
 			"tasks": [
-				"655fde99-a77f-4757-a25e-50cd538d4b8a"
+				"8f85cbae-ecab-4496-bf08-efc8122aeb29"
 			]
 		},
 		{
@@ -53,7 +53,8 @@
 				"88fcf58d-e333-49a0-a3e4-3ffdc6f7f8bc",
 				"666f5a5e-9d28-4c8d-9f87-f568b8d45b9b",
 				"ef64dd67-1bce-4c5f-ac27-754806997ba8",
-				"d04b6ec8-212b-45cb-abff-dc8ffd422271"
+				"d04b6ec8-212b-45cb-abff-dc8ffd422271",
+				"655fde99-a77f-4757-a25e-50cd538d4b8a"
 			]
 		}
 	],
@@ -146,17 +147,17 @@
 			"steps": []
 		},
 		{
-			"uuid": "3e7380a5-dd78-46ec-bae9-be3ee82d9fa9",
-			"title": "Пометить все скрипты как @tool",
-			"description": "",
-			"category": "0453c5b0-2b5a-4019-bf86-f5624ef6516e",
-			"steps": []
-		},
-		{
 			"uuid": "d04b6ec8-212b-45cb-abff-dc8ffd422271",
 			"title": "Добавить линтер",
 			"description": "",
 			"category": "bb1f5bd1-6f3f-4210-9ea9-4471055c508c",
+			"steps": []
+		},
+		{
+			"uuid": "8f85cbae-ecab-4496-bf08-efc8122aeb29",
+			"title": "Убрать подсветку кода, когда показываю подсказки",
+			"description": "",
+			"category": "04505893-73a3-4936-b09f-e6a9d360c7ff",
 			"steps": []
 		}
 	],

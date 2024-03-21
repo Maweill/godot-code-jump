@@ -6,6 +6,9 @@ class JumpHint:
 	var text_editor_position: CJTextPosition
 	var view: Label
 
+	func get_color_rect() -> ColorRect:
+		return view.get_children().front() as ColorRect
+
 	#TODO Сделать getter-ом
 	func get_text() -> String:
 		return view.text
@@ -81,7 +84,7 @@ func on_input(event: InputEvent, viewport: Viewport) -> void:
 
 func _highlight_matches_async(from_position: CJTextPosition, to_line: int) -> void:
 	var carets := _add_carets_at_words_start(from_position, to_line)
-	var timer := _create_and_start_timer(0.3)
+	var timer := _create_and_start_timer(0.15)
 	await timer.timeout
 	_jump_hints = _spawn_jump_hints(carets)
 	_text_editor.remove_secondary_carets()
@@ -140,10 +143,14 @@ func _spawn_jump_hints(carets: Dictionary) -> Array[JumpHint]:
 			first_letter_code += 1
 
 		var jump_hint := _create_jump_hint(caret_word_position, hint_text)
+
 		jump_hints.append(jump_hint)
 		var caret_draw_position := _text_editor.get_caret_draw_pos(caret_index)
 		_position_jump_hint(_text_editor, jump_hint.view, caret_draw_position)
 		_text_editor.add_child(jump_hint.view)
+		print("hint_size=%s" % jump_hint.view.size)
+		var hint_background := jump_hint.get_color_rect()
+		_fit_hint_background(hint_background)
 		print("hint_text=%s" % hint_text)
 
 	return jump_hints
@@ -179,6 +186,11 @@ func _create_and_start_timer(time_sec: float) -> Timer:
 	_text_editor.add_child(timer)
 	timer.start(time_sec)
 	return timer
+
+
+func _fit_hint_background(hint_background: ColorRect) -> void:
+	hint_background.pivot_offset = hint_background.size / 2
+	hint_background.scale = Vector2(hint_background.scale.x / 2, hint_background.scale.y / 1.5)
 
 
 func _position_jump_hint(
