@@ -27,8 +27,9 @@ const LATIN_LETTERS_COUNT := 25
 
 var _jump_hint_scene: PackedScene = preload("res://addons/code_jump/src/views/jump_hint.tscn")
 var _text_editor: TextEdit
+var _v_scroll_bar: VScrollBar
+var _h_scroll_bar: HScrollBar
 var _jump_letter: String
-
 var _jump_hints: Array[JumpHint] = []
 
 
@@ -41,11 +42,18 @@ func on_enter(model: CJModel) -> void:
 		highlight_from_position, _text_editor.get_last_full_visible_line() + 1
 	)
 	_text_editor.release_focus()
+
+	_v_scroll_bar = _text_editor.get_v_scroll_bar()
+	_h_scroll_bar = _text_editor.get_h_scroll_bar()
+	_v_scroll_bar.value_changed.connect(_on_editor_scroll)
+	_h_scroll_bar.value_changed.connect(_on_editor_scroll)
 	print("listening for hint key")
 
 
 func on_exit() -> void:
 	_destroy_jump_hints(_jump_hints)
+	_v_scroll_bar.value_changed.disconnect(_on_editor_scroll)
+	_h_scroll_bar.value_changed.disconnect(_on_editor_scroll)
 
 
 func on_input(event: InputEvent, viewport: Viewport) -> void:
@@ -154,6 +162,15 @@ func _spawn_jump_hints(carets: Dictionary) -> Array[JumpHint]:
 		print("hint_text=%s" % hint_text)
 
 	return jump_hints
+
+
+func _on_editor_scroll(value: float) -> void:
+	_cancel_listening()
+
+
+func _cancel_listening() -> void:
+	print("cancel listening")
+	cancelled.emit()
 
 
 func _create_jump_hint(text_editor_position: CJTextPosition, hint_letter: String) -> JumpHint:
