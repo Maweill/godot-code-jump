@@ -28,14 +28,15 @@
 			"tasks": [
 				"3f0b899d-8bdc-40b6-aee3-0c3d5c3f5836",
 				"47450b6f-e26a-4c84-a2b8-a2db0c0cb5e4",
-				"8f85cbae-ecab-4496-bf08-efc8122aeb29"
+				"8f85cbae-ecab-4496-bf08-efc8122aeb29",
+				"d421d789-f98a-495f-bf09-0d3c69472b8f"
 			]
 		},
 		{
 			"uuid": "f3d48a57-61e4-4a5b-a494-fbaf5320de52",
 			"title": "Todo",
 			"tasks": [
-				"d421d789-f98a-495f-bf09-0d3c69472b8f"
+				"0a2ca50c-c155-43ba-8010-6e0da8181210"
 			]
 		},
 		{
@@ -196,6 +197,34 @@
 			"description": "Перенести локальный класс JumpHint в отдельный файл и наследоваться от Label.",
 			"category": "0453c5b0-2b5a-4019-bf86-f5624ef6516e",
 			"steps": []
+		},
+		{
+			"uuid": "0a2ca50c-c155-43ba-8010-6e0da8181210",
+			"title": "Подготовить плагин к публикации",
+			"description": "Вероятно стоит создать новый проект и репозиторий.\n\nПример репозитория https://github.com/YuriSizov/godot-time-tracker",
+			"category": "bb1f5bd1-6f3f-4210-9ea9-4471055c508c",
+			"steps": [
+				{
+					"details": "Убрать комменты на русском",
+					"done": false
+				},
+				{
+					"details": "Убрать лишние плагины",
+					"done": false
+				},
+				{
+					"details": "Добавить MIT лицензию",
+					"done": false
+				},
+				{
+					"details": "Добавить README",
+					"done": false
+				},
+				{
+					"details": "Добавить иконку",
+					"done": false
+				}
+			]
 		}
 	],
 	"layout": {
