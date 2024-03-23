@@ -9,7 +9,7 @@ class JumpHint:
 	func get_color_rect() -> ColorRect:
 		return view.get_children().front() as ColorRect
 
-	#TODO Сделать getter-ом
+	#TODO To getter
 	func get_text() -> String:
 		return view.text
 
