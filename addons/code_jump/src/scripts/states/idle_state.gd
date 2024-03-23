@@ -7,7 +7,7 @@ var _plugin_shortcut: Shortcut
 
 
 func on_enter(model: CJModel) -> void:
-	_plugin_shortcut = model.plugin_shortcut
+	_plugin_shortcut = model.settings.plugin_activation_shortcut
 
 
 func on_exit() -> void:

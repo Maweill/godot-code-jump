@@ -29,6 +29,8 @@ var _jump_hint_scene: PackedScene = preload("res://addons/code_jump/src/views/ju
 var _text_editor: TextEdit
 var _v_scroll_bar: VScrollBar
 var _h_scroll_bar: HScrollBar
+var _hint_font_color: Color
+var _hint_background_color: Color
 var _jump_letter: String
 var _jump_hints: Array[JumpHint] = []
 
@@ -36,6 +38,8 @@ var _jump_hints: Array[JumpHint] = []
 func on_enter(model: CJModel) -> void:
 	_text_editor = model.text_editor
 	_jump_letter = model.jump_letter
+	_hint_font_color = model.settings.hint_font_color
+	_hint_background_color = model.settings.hint_background_color
 	_text_editor.grab_focus()
 	var highlight_from_position = CJTextPosition.new(_text_editor.get_first_visible_line(), 0)
 	await _highlight_matches_async(
@@ -181,12 +185,13 @@ func _create_jump_hint(text_editor_position: CJTextPosition, hint_letter: String
 
 
 func _create_jump_hint_view(hint_letter: String) -> Label:
-	var jump_hint_view = _jump_hint_scene.instantiate()
+	var jump_hint_view := _jump_hint_scene.instantiate() as Label
 	jump_hint_view.text = hint_letter
-
+	jump_hint_view.add_theme_color_override("font_color", _hint_font_color)
+	var hint_background := jump_hint_view.get_children().front() as ColorRect
+	hint_background.color = _hint_background_color
 	var font_size = _get_editor_settings().get_setting("interface/editor/code_font_size")
 	jump_hint_view.set("theme_override_font_sizes/font_size", font_size)
-
 	jump_hint_view.scale *= EditorInterface.get_editor_scale()
 	return jump_hint_view
 
