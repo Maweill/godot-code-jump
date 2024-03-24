@@ -25,7 +25,7 @@ signal cancelled
 
 const LATIN_LETTERS_COUNT := 25
 
-var _jump_hint_scene: PackedScene = preload("res://addons/code_jump/src/views/jump_hint.tscn")
+var _jump_hint_scene: PackedScene = preload("res://addons/code_jump/nodes/jump_hint.tscn")
 var _text_editor: TextEdit
 var _v_scroll_bar: VScrollBar
 var _h_scroll_bar: HScrollBar
