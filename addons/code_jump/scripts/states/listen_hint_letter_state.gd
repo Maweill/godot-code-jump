@@ -51,7 +51,6 @@ func on_enter(model: CJModel) -> void:
 	_h_scroll_bar = _text_editor.get_h_scroll_bar()
 	_v_scroll_bar.value_changed.connect(_on_editor_scroll)
 	_h_scroll_bar.value_changed.connect(_on_editor_scroll)
-	print("listening for hint key")
 
 
 func on_exit() -> void:
@@ -75,7 +74,6 @@ func on_input(event: InputEvent, viewport: Viewport) -> void:
 	if double_hints_starting_with_letter.size() > 0:
 		var double_hint := double_hints_starting_with_letter.front() as JumpHint
 		var hint_second_letter := double_hint.get_text()[1]
-		print("hint_second_letter=%s" % hint_second_letter)
 
 		var first_double_hint_position := double_hint.text_editor_position
 		var last_double_hint_starting_with_letter := (
@@ -112,7 +110,6 @@ func _add_carets_at_words_start(from_position: CJTextPosition, to_line: int) -> 
 	var main_caret_position := _text_editor.get_line_column_at_pos(
 		_text_editor.get_caret_draw_pos()
 	)
-	print("search_start=%s" % search_start)
 	for word in whole_words:
 		var word_position := _text_editor.search(word, 2, search_start.line, search_start.column)
 		var caret_index := (
@@ -121,7 +118,6 @@ func _add_carets_at_words_start(from_position: CJTextPosition, to_line: int) -> 
 			else 0
 		)
 		carets[caret_index] = CJTextPosition.new(word_position.y, word_position.x)
-		print("word=%s, word_position=%s" % [word, word_position])
 		search_start = CJTextPosition.new(word_position.y, word_position.x + 1)
 	return carets
 
@@ -133,7 +129,6 @@ func _spawn_jump_hints(carets: Dictionary) -> Array[JumpHint]:
 	var first_letter_code := 97  # ASCII code for 'a'
 	var second_letter_code := 97
 	var double_letter_used := double_letter_count > 0
-	print("carets count = %s" % carets.size())
 
 	var jump_hints: Array[JumpHint] = []
 	for caret_index in carets:
@@ -160,10 +155,8 @@ func _spawn_jump_hints(carets: Dictionary) -> Array[JumpHint]:
 		var caret_draw_position := _text_editor.get_caret_draw_pos(caret_index)
 		_position_jump_hint(_text_editor, jump_hint.view, caret_draw_position)
 		_text_editor.add_child(jump_hint.view)
-		print("hint_size=%s" % jump_hint.view.size)
 		var hint_background := jump_hint.get_color_rect()
 		_fit_hint_background(hint_background)
-		print("hint_text=%s" % hint_text)
 
 	return jump_hints
 
@@ -173,7 +166,6 @@ func _on_editor_scroll(value: float) -> void:
 
 
 func _cancel_listening() -> void:
-	print("cancel listening")
 	cancelled.emit()
 
 

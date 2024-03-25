@@ -5,7 +5,6 @@ signal jumped
 
 
 func on_enter(model: CJModel) -> void:
-	print("enter jump_state")
 	var text_editor := model.text_editor
 	var jump_position := model.jump_position
 	text_editor.grab_focus()
