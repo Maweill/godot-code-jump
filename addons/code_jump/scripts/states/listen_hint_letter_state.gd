@@ -230,10 +230,10 @@ func _get_double_hints() -> Array[JumpHint]:
 
 
 func _find_jump_hint(hint_text: String) -> JumpHint:
-	return (
-		GD_.find(_jump_hints, func(hint: JumpHint, _index): return hint.get_text() == hint_text)
-		as JumpHint
-	)
+	for hint in _jump_hints:
+			if hint.get_text() == hint_text:
+					return hint as JumpHint
+	return null
 
 
 func get_type() -> int:
