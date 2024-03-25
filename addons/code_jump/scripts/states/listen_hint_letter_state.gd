@@ -93,12 +93,14 @@ func on_input(event: InputEvent, viewport: Viewport) -> void:
 
 
 func _highlight_matches_async(from_position: CJTextPosition, to_line: int) -> void:
+	_text_editor.set_editable(false)
 	var carets := _add_carets_at_words_start(from_position, to_line)
 	var timer := _create_and_start_timer(0.15)
 	await timer.timeout
 	_jump_hints = _spawn_jump_hints(carets)
 	_text_editor.remove_secondary_carets()
 	timer.queue_free()
+	_text_editor.set_editable(true)
 
 
 func _add_carets_at_words_start(from_position: CJTextPosition, to_line: int) -> Dictionary:
