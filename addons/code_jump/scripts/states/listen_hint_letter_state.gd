@@ -231,8 +231,8 @@ func _get_double_hints() -> Array[JumpHint]:
 
 func _find_jump_hint(hint_text: String) -> JumpHint:
 	for hint in _jump_hints:
-			if hint.get_text() == hint_text:
-					return hint as JumpHint
+		if hint.get_text() == hint_text:
+			return hint as JumpHint
 	return null
 
 
