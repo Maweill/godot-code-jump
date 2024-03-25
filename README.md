@@ -2,7 +2,17 @@
 
 The Code Jump addon allows for fast cursor movement without using the mouse or cursor keys.
 
-## How it Works
+## 📋 Requirements
+
+This addon is only compatible with Godot 4.0 or later.
+
+## 📦 Installation
+
+1. [Download Latest Release](https://github.com/Maweill/godot-code-jump/releases/latest)
+2. Unpack the `addons/code_jump` folder into your `/addons` folder within the Godot project
+3. Enable this addon within the Godot settings: `Project > Project Settings > Plugins`
+
+## 🔍 How it Works
 
 1. Press the `editor_settings/plugin/code_jump/activate` command to activate Code Jump.
 2. Press a key corresponding to the initial letter of the word you want to jump to.
@@ -11,11 +21,11 @@ The Code Jump addon allows for fast cursor movement without using the mouse or c
 
 ![example gif](https://s9.gifyu.com/images/SV3pF.gif)
 
-## Commands
+## 📋 Commands
 
 - `editor_settings/plugin/code_jump/activate`: Activates Code Jump and waits for an initial letter input.
 
-## Customizing the Hint Appearance
+## 🎨 Customizing the Hint Appearance
 
 You can customize the appearance of the hint characters by adjusting the following settings:
 
