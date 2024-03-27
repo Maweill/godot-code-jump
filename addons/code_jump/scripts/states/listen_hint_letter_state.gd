@@ -132,7 +132,6 @@ func _spawn_jump_hints(carets: Dictionary) -> Array[JumpHint]:
 	var second_letter_code := 97
 	var double_letter_used := double_letter_count > 0
 	var char_width: int
-	var char_height: int
 
 	var jump_hints: Array[JumpHint] = []
 	for caret_index in carets:
@@ -173,22 +172,9 @@ func _spawn_jump_hints(carets: Dictionary) -> Array[JumpHint]:
 		var width = next_char_caret.x - caret_draw_position.x
 		char_width = max(char_width, width)
 
-		var next_char_position1 := CJTextPosition.new(
-			caret_word_position.line + 1, caret_word_position.column
-		)
-		var additional_caret_index1 := _text_editor.add_caret(
-			next_char_position1.line, next_char_position1.column
-		)
-		var timer1 := _create_and_start_timer(0.15)
-
-		await timer1.timeout
-		timer1.queue_free()
-		var next_char_caret1 := _text_editor.get_caret_draw_pos(additional_caret_index1)
-		var height = next_char_caret1.y - caret_draw_position.y
-		char_height = max(char_height, height)
 	for jump_hint: JumpHint in jump_hints:
 		var hint_background := jump_hint.get_color_rect()
-		_fit_hint_background(hint_background, char_width, char_height)
+		_fit_hint_background(hint_background, char_width, _text_editor.get_line_height())
 	return jump_hints
 
 
@@ -237,7 +223,7 @@ func _create_and_start_timer(time_sec: float) -> Timer:
 func _fit_hint_background(hint_background: ColorRect, char_width: int, char_height: int) -> void:
 	hint_background.pivot_offset = hint_background.size / 2
 	hint_background.scale = Vector2(
-		(char_width + 1) / hint_background.size.x, (char_height / 1.3) / hint_background.size.y
+		(char_width * 1.1) / hint_background.size.x, (char_height * 0.9) / hint_background.size.y
 	)
 
 
