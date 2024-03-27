@@ -181,12 +181,13 @@ func _create_jump_hint(text_editor_position: CJTextPosition, hint_letter: String
 func _create_jump_hint_view(hint_letter: String) -> Label:
 	var jump_hint_view := _jump_hint_scene.instantiate() as Label
 	jump_hint_view.text = hint_letter
+	var editor_font = _text_editor.get_theme_font("font")
+	jump_hint_view.add_theme_font_override("font", editor_font)
 	jump_hint_view.add_theme_color_override("font_color", _hint_font_color)
 	var hint_background := jump_hint_view.get_children().front() as ColorRect
 	hint_background.color = _hint_background_color
-	var font_size = _get_editor_settings().get_setting("interface/editor/code_font_size")
+	var font_size := _text_editor.get_theme_font_size("font_size")
 	jump_hint_view.set("theme_override_font_sizes/font_size", font_size)
-	jump_hint_view.scale *= EditorInterface.get_editor_scale()
 	return jump_hint_view
 
 
@@ -206,7 +207,7 @@ func _create_and_start_timer(time_sec: float) -> Timer:
 
 func _fit_hint_background(hint_background: ColorRect) -> void:
 	hint_background.pivot_offset = hint_background.size / 2
-	hint_background.scale = Vector2(hint_background.scale.x / 2, hint_background.scale.y / 1.5)
+	hint_background.scale = Vector2(hint_background.scale.x / 1.5, hint_background.scale.y / 1.5)
 
 
 func _position_jump_hint(
