@@ -21,10 +21,14 @@ class JumpHint:
 
 
 class Caret:
+	var index: int
 	var text_position: CJTextPosition
 	var next_letter_caret_index: int
 
-	func _init(text_position_value: CJTextPosition, next_letter_caret_index_value: int) -> void:
+	func _init(
+		index_value: int, text_position_value: CJTextPosition, next_letter_caret_index_value: int
+	) -> void:
+		index = index_value
 		text_position = text_position_value
 		next_letter_caret_index = next_letter_caret_index_value
 
@@ -112,8 +116,8 @@ func _highlight_matches_async(from_position: CJTextPosition, to_line: int) -> vo
 	_text_editor.set_editable(true)
 
 
-func _add_carets_at_words_start(from_position: CJTextPosition, to_line: int) -> Dictionary:
-	var carets: Dictionary = {}  # caret_index (int): caret (Caret)
+func _add_carets_at_words_start(from_position: CJTextPosition, to_line: int) -> Array[Caret]:
+	var carets: Array[Caret] = []
 	var whole_words := CJUtils.get_visible_words_starting_with_letter(
 		_text_editor, _jump_letter, from_position.line, to_line
 	)
@@ -129,27 +133,26 @@ func _add_carets_at_words_start(from_position: CJTextPosition, to_line: int) -> 
 			else 0
 		)
 		var next_letter_caret_index := _text_editor.add_caret(word_position.y, word_position.x + 1)
-		carets[caret_index] = Caret.new(
-			CJTextPosition.new(word_position.y, word_position.x), next_letter_caret_index
+		var caret = Caret.new(
+			caret_index,
+			CJTextPosition.new(word_position.y, word_position.x),
+			next_letter_caret_index
 		)
+		carets.append(caret)
 		search_start = CJTextPosition.new(word_position.y, word_position.x + 1)
 	return carets
 
 
-func _spawn_jump_hints(carets: Dictionary) -> Array[JumpHint]:
+func _spawn_jump_hints(carets: Array[Caret]) -> Array[JumpHint]:
 	var double_letter_count := (
 		carets.size() - LATIN_LETTERS_COUNT if carets.size() > LATIN_LETTERS_COUNT else 0
 	)
 	var first_letter_code := 97  # ASCII code for 'a'
 	var second_letter_code := 97
 	var double_letter_used := double_letter_count > 0
-	var char_width: int
-
 	var jump_hints: Array[JumpHint] = []
-	for caret_index in carets:
-		var caret_word_position: CJTextPosition = (carets[caret_index] as Caret).text_position
+	for caret in carets:
 		var hint_text := ""
-
 		if double_letter_count > 0:
 			hint_text = char(first_letter_code) + char(second_letter_code)
 			second_letter_code += 1
@@ -163,24 +166,19 @@ func _spawn_jump_hints(carets: Dictionary) -> Array[JumpHint]:
 				double_letter_used = false
 			hint_text = char(first_letter_code)
 			first_letter_code += 1
-		var jump_hint := _create_jump_hint(caret_word_position, hint_text)
 
+		var jump_hint := _create_jump_hint(caret.text_position, hint_text)
 		jump_hints.append(jump_hint)
-		var caret_draw_position := _text_editor.get_caret_draw_pos(caret_index)
+		var caret_draw_position := _text_editor.get_caret_draw_pos(caret.index)
 		_position_jump_hint(_text_editor, jump_hint.view, caret_draw_position)
 		_text_editor.add_child(jump_hint.view)
 
-		var next_letter_caret_index := (carets[caret_index] as Caret).next_letter_caret_index
+		var next_letter_caret_index := caret.next_letter_caret_index
 		var next_letter_caret_draw_pos := _text_editor.get_caret_draw_pos(next_letter_caret_index)
 		var width = next_letter_caret_draw_pos.x - caret_draw_position.x
-		char_width = max(char_width, width)
-
-	for jump_hint: JumpHint in jump_hints:
 		var hint_background := jump_hint.get_color_rect()
 		_fit_hint_background(
-			hint_background,
-			char_width * jump_hint.get_text().length(),
-			_text_editor.get_line_height()
+			hint_background, width * jump_hint.get_text().length(), _text_editor.get_line_height()
 		)
 	return jump_hints
 
