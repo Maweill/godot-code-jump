@@ -20,6 +20,15 @@ class JumpHint:
 		view.queue_free()
 
 
+class Caret:
+	var text_position: CJTextPosition
+	var next_letter_caret_index: int
+
+	func _init(text_position_value: CJTextPosition, next_letter_caret_index_value: int) -> void:
+		text_position = text_position_value
+		next_letter_caret_index = next_letter_caret_index_value
+
+
 signal jump_position_received(position: CJTextPosition)
 signal cancelled
 
@@ -104,7 +113,7 @@ func _highlight_matches_async(from_position: CJTextPosition, to_line: int) -> vo
 
 
 func _add_carets_at_words_start(from_position: CJTextPosition, to_line: int) -> Dictionary:
-	var carets: Dictionary = {}  # caret_index (int): word_position (CJTextPosition)
+	var carets: Dictionary = {}  # caret_index (int): caret (Caret)
 	var whole_words := CJUtils.get_visible_words_starting_with_letter(
 		_text_editor, _jump_letter, from_position.line, to_line
 	)
@@ -119,7 +128,10 @@ func _add_carets_at_words_start(from_position: CJTextPosition, to_line: int) -> 
 			if main_caret_position != word_position
 			else 0
 		)
-		carets[caret_index] = CJTextPosition.new(word_position.y, word_position.x)
+		var next_letter_caret_index := _text_editor.add_caret(word_position.y, word_position.x + 1)
+		carets[caret_index] = Caret.new(
+			CJTextPosition.new(word_position.y, word_position.x), next_letter_caret_index
+		)
 		search_start = CJTextPosition.new(word_position.y, word_position.x + 1)
 	return carets
 
@@ -135,7 +147,7 @@ func _spawn_jump_hints(carets: Dictionary) -> Array[JumpHint]:
 
 	var jump_hints: Array[JumpHint] = []
 	for caret_index in carets:
-		var caret_word_position: CJTextPosition = carets[caret_index]
+		var caret_word_position: CJTextPosition = (carets[caret_index] as Caret).text_position
 		var hint_text := ""
 
 		if double_letter_count > 0:
@@ -158,23 +170,18 @@ func _spawn_jump_hints(carets: Dictionary) -> Array[JumpHint]:
 		_position_jump_hint(_text_editor, jump_hint.view, caret_draw_position)
 		_text_editor.add_child(jump_hint.view)
 
-		var next_char_position := CJTextPosition.new(
-			caret_word_position.line, caret_word_position.column + 1
-		)
-		var additional_caret_index := _text_editor.add_caret(
-			next_char_position.line, next_char_position.column
-		)
-		var timer := _create_and_start_timer(0.15)
-
-		await timer.timeout
-		timer.queue_free()
-		var next_char_caret := _text_editor.get_caret_draw_pos(additional_caret_index)
-		var width = next_char_caret.x - caret_draw_position.x
+		var next_letter_caret_index := (carets[caret_index] as Caret).next_letter_caret_index
+		var next_letter_caret_draw_pos := _text_editor.get_caret_draw_pos(next_letter_caret_index)
+		var width = next_letter_caret_draw_pos.x - caret_draw_position.x
 		char_width = max(char_width, width)
 
 	for jump_hint: JumpHint in jump_hints:
 		var hint_background := jump_hint.get_color_rect()
-		_fit_hint_background(hint_background, char_width, _text_editor.get_line_height())
+		_fit_hint_background(
+			hint_background,
+			char_width * jump_hint.get_text().length(),
+			_text_editor.get_line_height()
+		)
 	return jump_hints
 
 
