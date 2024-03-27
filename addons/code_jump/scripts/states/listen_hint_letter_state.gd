@@ -97,7 +97,7 @@ func _highlight_matches_async(from_position: CJTextPosition, to_line: int) -> vo
 	var carets := _add_carets_at_words_start(from_position, to_line)
 	var timer := _create_and_start_timer(0.15)
 	await timer.timeout
-	_jump_hints = _spawn_jump_hints(carets)
+	_jump_hints = await _spawn_jump_hints(carets)
 	_text_editor.remove_secondary_carets()
 	timer.queue_free()
 	_text_editor.set_editable(true)
@@ -131,6 +131,8 @@ func _spawn_jump_hints(carets: Dictionary) -> Array[JumpHint]:
 	var first_letter_code := 97  # ASCII code for 'a'
 	var second_letter_code := 97
 	var double_letter_used := double_letter_count > 0
+	var char_width: int
+	var char_height: int
 
 	var jump_hints: Array[JumpHint] = []
 	for caret_index in carets:
@@ -150,16 +152,43 @@ func _spawn_jump_hints(carets: Dictionary) -> Array[JumpHint]:
 				double_letter_used = false
 			hint_text = char(first_letter_code)
 			first_letter_code += 1
-
 		var jump_hint := _create_jump_hint(caret_word_position, hint_text)
 
 		jump_hints.append(jump_hint)
 		var caret_draw_position := _text_editor.get_caret_draw_pos(caret_index)
 		_position_jump_hint(_text_editor, jump_hint.view, caret_draw_position)
 		_text_editor.add_child(jump_hint.view)
-		var hint_background := jump_hint.get_color_rect()
-		_fit_hint_background(hint_background)
 
+		var next_char_position := CJTextPosition.new(
+			caret_word_position.line, caret_word_position.column + 1
+		)
+		var additional_caret_index := _text_editor.add_caret(
+			next_char_position.line, next_char_position.column
+		)
+		var timer := _create_and_start_timer(0.15)
+
+		await timer.timeout
+		timer.queue_free()
+		var next_char_caret := _text_editor.get_caret_draw_pos(additional_caret_index)
+		var width = next_char_caret.x - caret_draw_position.x
+		char_width = max(char_width, width)
+
+		var next_char_position1 := CJTextPosition.new(
+			caret_word_position.line + 1, caret_word_position.column
+		)
+		var additional_caret_index1 := _text_editor.add_caret(
+			next_char_position1.line, next_char_position1.column
+		)
+		var timer1 := _create_and_start_timer(0.15)
+
+		await timer1.timeout
+		timer1.queue_free()
+		var next_char_caret1 := _text_editor.get_caret_draw_pos(additional_caret_index1)
+		var height = next_char_caret1.y - caret_draw_position.y
+		char_height = max(char_height, height)
+	for jump_hint: JumpHint in jump_hints:
+		var hint_background := jump_hint.get_color_rect()
+		_fit_hint_background(hint_background, char_width, char_height)
 	return jump_hints
 
 
@@ -205,9 +234,11 @@ func _create_and_start_timer(time_sec: float) -> Timer:
 	return timer
 
 
-func _fit_hint_background(hint_background: ColorRect) -> void:
+func _fit_hint_background(hint_background: ColorRect, char_width: int, char_height: int) -> void:
 	hint_background.pivot_offset = hint_background.size / 2
-	hint_background.scale = Vector2(hint_background.scale.x / 1.5, hint_background.scale.y / 1.5)
+	hint_background.scale = Vector2(
+		(char_width + 1) / hint_background.size.x, (char_height / 1.3) / hint_background.size.y
+	)
 
 
 func _position_jump_hint(
