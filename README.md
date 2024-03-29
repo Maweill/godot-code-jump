@@ -4,7 +4,7 @@ The Code Jump addon allows for fast cursor movement without using the mouse or c
 
 ## 📋 Requirements
 
-This addon is only compatible with Godot 4.0 or later.
+This addon is only compatible with Godot 4.2 or later.
 
 ## 📦 Installation
 
