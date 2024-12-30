@@ -39,7 +39,11 @@ const DEFAULT_TYPED_RETURN_VALUES := {
 	TYPE_PACKED_STRING_ARRAY: "PackedStringArray()",
 	TYPE_PACKED_VECTOR2_ARRAY: "PackedVector2Array()",
 	TYPE_PACKED_VECTOR3_ARRAY: "PackedVector3Array()",
+	# since Godot 4.3.beta1 TYPE_PACKED_VECTOR4_ARRAY = 38
+	GdObjects.TYPE_PACKED_VECTOR4_ARRAY: "PackedVector4Array()",
 	TYPE_PACKED_COLOR_ARRAY: "PackedColorArray()",
+	GdObjects.TYPE_VARIANT: "null",
+	GdObjects.TYPE_ENUM: "0"
 }
 
 # @GlobalScript enums
@@ -67,60 +71,80 @@ const DEFAULT_ENUM_RETURN_VALUES = {
 
 var _push_errors :String
 
+
+# Determine the enum default by reflection
+static func get_enum_default(value :String) -> Variant:
+	var script := GDScript.new()
+	script.source_code = """
+	extends Resource
+
+	static func get_enum_default() -> Variant:
+		return %s.values()[0]
+
+	""".dedent() % value
+	@warning_ignore("return_value_discarded")
+	script.reload()
+	@warning_ignore("unsafe_method_access")
+	return script.new().call("get_enum_default")
+
+
 static func default_return_value(func_descriptor :GdFunctionDescriptor) -> String:
 	var return_type :Variant = func_descriptor.return_type()
 	if return_type == GdObjects.TYPE_ENUM:
-		var enum_path := func_descriptor._return_class.split(".")
-		if enum_path.size() == 2:
+		var enum_class := func_descriptor._return_class
+		var enum_path := enum_class.split(".")
+		if enum_path.size() >= 2:
 			var keys := ClassDB.class_get_enum_constants(enum_path[0], enum_path[1])
-			return "%s.%s" % [enum_path[0], keys[0]]
+			if not keys.is_empty():
+				return "%s.%s" % [enum_path[0], keys[0]]
+			var enum_value :Variant = get_enum_default(enum_class)
+			if enum_value != null:
+				return str(enum_value)
 		# we need fallback for @GlobalScript enums,
 		return DEFAULT_ENUM_RETURN_VALUES.get(func_descriptor._return_class, "0")
-	return DEFAULT_TYPED_RETURN_VALUES.get(return_type, "null")
+	return DEFAULT_TYPED_RETURN_VALUES.get(return_type, "invalid")
 
 
-func _init(push_errors :bool = false):
+func _init(push_errors :bool = false) -> void:
 	_push_errors = "true" if push_errors else "false"
-	if DEFAULT_TYPED_RETURN_VALUES.size() != TYPE_MAX:
-		push_error("missing default definitions! Expexting %d bud is %d" % [DEFAULT_TYPED_RETURN_VALUES.size(), TYPE_MAX])
-		for type_key in range(0, DEFAULT_TYPED_RETURN_VALUES.size()):
-			if not DEFAULT_TYPED_RETURN_VALUES.has(type_key):
-				prints("missing default definition for type", type_key)
-				assert(DEFAULT_TYPED_RETURN_VALUES.has(type_key), "Missing Type default definition!")
+	for type_key in TYPE_MAX:
+		if not DEFAULT_TYPED_RETURN_VALUES.has(type_key):
+			push_error("missing default definitions! Expexting %d bud is %d" % [DEFAULT_TYPED_RETURN_VALUES.size(), TYPE_MAX])
+			prints("missing default definition for type", type_key)
+			assert(DEFAULT_TYPED_RETURN_VALUES.has(type_key), "Missing Type default definition!")
 
 
 @warning_ignore("unused_parameter")
-func get_template(return_type :Variant, is_vararg :bool) -> String:
-	push_error("Must be implemented!")
+func get_template(return_type: GdFunctionDescriptor, is_callable: bool) -> String:
+	assert(false, "'get_template' must be implemented!")
 	return ""
 
 
-func double(func_descriptor :GdFunctionDescriptor) -> PackedStringArray:
-	var func_signature := func_descriptor.typeless()
+func double(func_descriptor: GdFunctionDescriptor, is_callable: bool = false) -> PackedStringArray:
 	var is_static := func_descriptor.is_static()
-	var is_vararg := func_descriptor.is_vararg()
 	var is_coroutine := func_descriptor.is_coroutine()
 	var func_name := func_descriptor.name()
 	var args := func_descriptor.args()
 	var varargs := func_descriptor.varargs()
 	var return_value := GdFunctionDoubler.default_return_value(func_descriptor)
-	var arg_names := extract_arg_names(args)
+	var arg_names := extract_arg_names(args, true)
 	var vararg_names := extract_arg_names(varargs)
-	
+
 	# save original constructor arguments
 	if func_name == "_init":
 		var constructor_args := ",".join(GdFunctionDoubler.extract_constructor_args(args))
 		var constructor := "func _init(%s) -> void:\n	super(%s)\n	pass\n" % [constructor_args, ", ".join(arg_names)]
 		return constructor.split("\n")
-	
-	var double_src := ""
-	double_src += '@warning_ignore("untyped_declaration")\n' if Engine.get_version_info().hex >= 0x40200 else '\n'
+
+	var double_src := "@warning_ignore('shadowed_variable', 'untyped_declaration', 'unsafe_call_argument', 'unsafe_method_access')\n"
 	if func_descriptor.is_engine():
 		double_src += '@warning_ignore("native_method_override")\n'
-	double_src += '@warning_ignore("shadowed_variable")\n'
-	double_src += func_signature
+	if func_descriptor.return_type() == GdObjects.TYPE_ENUM:
+		double_src += '@warning_ignore("int_as_enum_without_match")\n'
+		double_src += '@warning_ignore("int_as_enum_without_cast")\n'
+	double_src += GdFunctionDoubler.extract_func_signature(func_descriptor)
 	# fix to  unix format, this is need when the template is edited under windows than the template is stored with \r\n
-	var func_template := get_template(func_descriptor.return_type(), is_vararg).replace("\r\n", "\n")
+	var func_template := get_template(func_descriptor, is_callable).replace("\r\n", "\n")
 	double_src += func_template\
 		.replace("$(arguments)", ", ".join(arg_names))\
 		.replace("$(varargs)", ", ".join(vararg_names))\
@@ -128,7 +152,7 @@ func double(func_descriptor :GdFunctionDescriptor) -> PackedStringArray:
 		.replace("$(func_name)", func_name )\
 		.replace("${default_return_value}", return_value)\
 		.replace("$(push_errors)", _push_errors)
-	
+
 	if is_static:
 		double_src = double_src.replace("$(instance)", "__instance().")
 	else:
@@ -136,24 +160,52 @@ func double(func_descriptor :GdFunctionDescriptor) -> PackedStringArray:
 	return double_src.split("\n")
 
 
-func extract_arg_names(argument_signatures :Array[GdFunctionArgument]) -> PackedStringArray:
+func extract_arg_names(argument_signatures: Array[GdFunctionArgument], add_suffix := false) -> PackedStringArray:
 	var arg_names := PackedStringArray()
 	for arg in argument_signatures:
-		arg_names.append(arg._name)
+		@warning_ignore("return_value_discarded")
+		arg_names.append(arg._name + ("_" if add_suffix else ""))
 	return arg_names
 
 
-static func extract_constructor_args(args :Array) -> PackedStringArray:
+static func extract_constructor_args(args :Array[GdFunctionArgument]) -> PackedStringArray:
 	var constructor_args := PackedStringArray()
 	for arg in args:
-		var a := arg as GdFunctionArgument
-		var arg_name := a._name
-		var default_value = get_default(a)
+		var arg_name := arg._name + "_"
+		var default_value := get_default(arg)
 		if default_value == "null":
+			@warning_ignore("return_value_discarded")
 			constructor_args.append(arg_name + ":Variant=" + default_value)
 		else:
+			@warning_ignore("return_value_discarded")
 			constructor_args.append(arg_name + ":=" + default_value)
 	return constructor_args
+
+
+static func extract_func_signature(descriptor: GdFunctionDescriptor) -> String:
+	var func_signature := ""
+	if descriptor._return_type == TYPE_NIL:
+		func_signature = "func %s(%s) -> void:" % [descriptor.name(), typeless_args(descriptor)]
+	elif descriptor._return_type == GdObjects.TYPE_VARIANT:
+		func_signature = "func %s(%s):" % [descriptor.name(), typeless_args(descriptor)]
+	else:
+		func_signature = "func %s(%s) -> %s:" % [descriptor.name(), typeless_args(descriptor), descriptor.return_type_as_string()]
+	return "static " + func_signature if descriptor.is_static() else func_signature
+
+
+static func typeless_args(descriptor: GdFunctionDescriptor) -> String:
+	var collect := PackedStringArray()
+	for arg in descriptor.args():
+		if arg.has_default():
+			@warning_ignore("return_value_discarded")
+			collect.push_back(arg.name() + "_" + "=" + arg.value_as_string())
+		else:
+			@warning_ignore("return_value_discarded")
+			collect.push_back(arg.name() + "_")
+	for arg in descriptor.varargs():
+		@warning_ignore("return_value_discarded")
+		collect.push_back(arg.name() + "=" + arg.value_as_string())
+	return ", ".join(collect)
 
 
 static func get_default(arg :GdFunctionArgument) -> String:

@@ -33,6 +33,10 @@ folder_colors={
 "res://addons/code_jump/": "blue"
 }
 
+[gdunit4]
+
+ui/inspector/tree_view_mode=1
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
