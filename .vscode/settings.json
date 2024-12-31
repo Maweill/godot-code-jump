@@ -1,0 +1,4 @@
+{
+    "workbench.preferredLightColorTheme": "Godot 4", // предпочитаемая светлая тема Default Light Model (base)
+    "workbench.preferredDarkColorTheme": "Godot 4", // предпочитаемая темная тема
+}

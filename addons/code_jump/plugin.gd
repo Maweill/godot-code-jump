@@ -2,7 +2,8 @@
 extends EditorPlugin
 
 const CODE_JUMP_SETTING_NAME: StringName = &"plugin/code_jump/"
-const ACTIVATE_PLUGIN_SHORTCUT_SETTING_NAME: StringName = CODE_JUMP_SETTING_NAME + &"activate"
+const ACTIVATE_PLUGIN_LETTER_SHORTCUT_SETTING_NAME: StringName = CODE_JUMP_SETTING_NAME + &"activate_letter"
+const ACTIVATE_PLUGIN_WORDS_SHORTCUT_SETTING_NAME: StringName = CODE_JUMP_SETTING_NAME + &"active_words"
 const HINT_FONT_COLOR_SETTING_NAME: StringName = CODE_JUMP_SETTING_NAME + &"hint_font_color"
 const HINT_BACKGROUND_COLOR_SETTING_NAME: StringName = CODE_JUMP_SETTING_NAME + &"hint_background_color"
 
@@ -32,7 +33,12 @@ func _init_states() -> void:
 	_states[listen_hint_letter_state.get_type()] = listen_hint_letter_state
 	_states[jump_state.get_type()] = jump_state
 
-	idle_state.plugin_activated.connect(func(): _change_state(listen_jump_letter_state))
+	idle_state.letter_plugin_activated.connect(func(): _change_state(listen_jump_letter_state))
+	idle_state.words_plugin_activated.connect(
+		func():
+			_model.jump_letter = ""
+			_change_state(listen_hint_letter_state)
+	)
 	listen_jump_letter_state.jump_letter_received.connect(
 		func(letter: String):
 			_model.jump_letter = letter
@@ -74,16 +80,22 @@ func _update_model(model: CJModel) -> void:
 
 
 func _get_plugin_settings() -> CJSettingsModel:
+	var letter_shortcut := _create_alt_shortcut(KEY_J)
+	var words_shortcut := _create_alt_shortcut(KEY_W)
+	var letter_plugin_activation_shortcut: Shortcut = _get_setting(ACTIVATE_PLUGIN_LETTER_SHORTCUT_SETTING_NAME, letter_shortcut)
+	var words_plugin_activation_shortcut: Shortcut = _get_setting(ACTIVATE_PLUGIN_WORDS_SHORTCUT_SETTING_NAME, words_shortcut)
+	var hint_font_color: Color = _get_setting(HINT_FONT_COLOR_SETTING_NAME, Color.BLACK)
+	var hint_background_color: Color = _get_setting(HINT_BACKGROUND_COLOR_SETTING_NAME, Color.RED)
+	return CJSettingsModel.new(letter_plugin_activation_shortcut, words_plugin_activation_shortcut, hint_font_color, hint_background_color)
+
+func _create_alt_shortcut(keycode: Key) -> Shortcut:
 	var shortcut: Shortcut = Shortcut.new()
 	var event: InputEventKey = InputEventKey.new()
 	event.device = -1
 	event.alt_pressed = true
-	event.keycode = KEY_J
-	shortcut.events = [ event ]
-	var plugin_activation_shortcut: Shortcut = _get_setting(ACTIVATE_PLUGIN_SHORTCUT_SETTING_NAME, shortcut)
-	var hint_font_color: Color = _get_setting(HINT_FONT_COLOR_SETTING_NAME, Color.BLACK)
-	var hint_background_color: Color = _get_setting(HINT_BACKGROUND_COLOR_SETTING_NAME, Color.RED)
-	return CJSettingsModel.new(plugin_activation_shortcut, hint_font_color, hint_background_color)
+	event.keycode = keycode
+	shortcut.events = [event]
+	return shortcut
 
 
 func _get_setting(property: StringName, alt: Variant) -> Variant:
@@ -97,10 +109,11 @@ func _get_setting(property: StringName, alt: Variant) -> Variant:
 
 
 func _sync_settings() -> void:
-	var plugin_activation_shortcut: Shortcut = _get_editor_settings().get_setting(ACTIVATE_PLUGIN_SHORTCUT_SETTING_NAME)
+	var plugin_activation_letter_shortcut: Shortcut = _get_editor_settings().get_setting(ACTIVATE_PLUGIN_LETTER_SHORTCUT_SETTING_NAME)
+	var plugin_activation_words_shortcut: Shortcut = _get_editor_settings().get_setting(ACTIVATE_PLUGIN_WORDS_SHORTCUT_SETTING_NAME)
 	var hint_font_color: Color = _get_editor_settings().get_setting(HINT_FONT_COLOR_SETTING_NAME)
 	var hint_background_color: Color = _get_editor_settings().get_setting(HINT_BACKGROUND_COLOR_SETTING_NAME)
-	_model.settings.update(plugin_activation_shortcut, hint_font_color, hint_background_color)
+	_model.settings.update(plugin_activation_letter_shortcut, plugin_activation_words_shortcut, hint_font_color, hint_background_color)
 
 
 func _get_current_text_editor() -> TextEdit:
